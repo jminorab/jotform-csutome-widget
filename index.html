@@ -598,29 +598,32 @@
                 return;
             }
 
-            JFCustomWidget.subscribe('submit', function(e) {
-                const stateDropdownValue = document.getElementById("state").value;
-                const otherStateInputValue = document.getElementById("otherStateInput").value.trim();
-                const finalJsonString = getWidgetData(); 
+          JFCustomWidget.subscribe("submit", function(e){
+            const stateDropdownValue = document.getElementById("state").value;
+            const districtDropdownValue = document.getElementById("district").value;
+            const siteDropdownValue = document.getElementById("site").value;
+            const otherStateInputValue = document.getElementById("otherStateInput").value.trim();
+            const otherDistrictInputValue = document.getElementById("otherDistrictInput").value.trim();
+            const otherSiteInputValue = document.getElementById("otherSiteInput").value.trim();
 
-                // Check for validation error (State dropdown is empty OR "Other" is selected but the text box is empty)
-                if (stateDropdownValue === '' || (stateDropdownValue === 'Other' && otherStateInputValue === '')) {
-                    // Send an invalid result back to JotForm to stop submission
-                    JFCustomWidget.sendSubmit({ 
-                        valid: false, 
-                        value: '',
-                        message: "Please select a State or fill in the 'Other' field." 
-                    });
-                    return; // Stop processing
-                }
-                
-                // Send the final, validated data to JotForm to allow submission
-                let result = {
-                    valid: true,
-                    value: finalJsonString // Pass the JSON string to JotForm
-                };
-                JFCustomWidget.sendSubmit(result);
-            });
+        // Validate state
+        if (
+            !stateDropdownValue || 
+            stateDropdownValue === "Please choose" || 
+            (stateDropdownValue === "Other" && !otherStateInputValue) ||
+            !districtDropdownValue ||
+            districtDropdownValue === "Choose District" ||
+            (districtDropdownValue === "Other" && !otherDistrictInputValue) ||
+            !siteDropdownValue ||
+            siteDropdownValue === "Choose Site" ||
+            (siteDropdownValue === "Other" && !otherSiteInputValue)
+        ) {
+            JFCustomWidget.sendSubmit({valid: false, value: "", message: "Please make selections for all dropdowns or fill in the 'Other' fields."});
+            return;
+        }
+        let finalJsonString = getWidgetData();
+        JFCustomWidget.sendSubmit({valid: true, value: finalJsonString});
+    });
         }
 
 
