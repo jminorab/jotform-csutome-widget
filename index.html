@@ -48,24 +48,24 @@
 <body>
     <div class="form-group">
         <label for="state">State:</label>
-        <select id="state" onchange="updateDistricts(); toggleOtherInput('state')">
+        <select id="state" onchange="updateDistricts(); toggleOtherInput('state'); sendWidgetData();">
             <option value="">Please choose</option>
         </select>
-        <input type="text" id="otherStateInput" class="other-input-hidden" placeholder="Enter State">
+        <input type="text" id="otherStateInput" class="other-input-hidden" placeholder="Enter State" oninput="sendWidgetData();">
     </div>
     <div class="form-group">
         <label for="district">District:</label>
-        <select id="district" onchange="updateSites(); toggleOtherInput('district')">
+        <select id="district" onchange="updateSites(); toggleOtherInput('district'); sendWidgetData();">
              <option value="">Choose State First</option>
         </select>
-        <input type="text" id="otherDistrictInput" class="other-input-hidden" placeholder="Enter District">
+        <input type="text" id="otherDistrictInput" class="other-input-hidden" placeholder="Enter District" oninput="sendWidgetData();">
     </div>
     <div class="form-group">
         <label for="site">Site:</label>
-        <select id="site" onchange="toggleOtherInput('site')">
+        <select id="site" onchange="toggleOtherInput('site'); sendWidgetData();">
             <option value="">Choose District First</option>
         </select>
-        <input type="text" id="otherSiteInput" class="other-input-hidden" placeholder="Enter Site">
+        <input type="text" id="otherSiteInput" class="other-input-hidden" placeholder="Enter Site" oninput="sendWidgetData();">
     </div>
    
  <script>
@@ -461,18 +461,15 @@
             {"state": "CO", "district": "Weld", "site name": "West Ridge Elementary School"}
         ]; 
         
-        // --- Helper Functions ---
+        // --- Helper Functions (No Change) ---
         
-        // Utility function to get unique, sorted values
         function getUniqueAndSorted(list, key) {
             const uniqueItems = [...new Set(list.map(item => item[key]))];
             return uniqueItems.sort();
         }
 
-        // Toggles the visibility of the "Other" text input
         function toggleOtherInput(dropdownId) {
             const dropdown = document.getElementById(dropdownId);
-            // Construct the ID for the corresponding text input (e.g., 'state' -> 'otherStateInput')
             const otherInput = document.getElementById(`other${dropdownId.charAt(0).toUpperCase() + dropdownId.slice(1)}Input`);
             
             if (dropdown.value === 'Other') {
@@ -480,26 +477,23 @@
                 otherInput.focus();
             } else {
                 otherInput.style.display = 'none';
-                // Clear value when not "Other" to prevent submitting stale data
                 otherInput.value = ''; 
             }
             
-            // Set a slight delay to allow the DOM to render before resizing the iframe
             setTimeout(() => { 
                 if (typeof JFCustomWidget !== 'undefined') { 
-                    JFCustomWidget.requestFrameResize(); // Request JotForm to resize
+                    JFCustomWidget.requestFrameResize();
                 } 
             }, 0);
         }
 
-        // --- Core Dropdown Update Logic ---
+        // --- Core Dropdown Update Logic (No Change) ---
         
         function updateDistricts() {
             const stateSel = document.getElementById('state');
             const districtSel = document.getElementById('district');
             const siteSel = document.getElementById('site');
             
-            // Reset District and Site dropdowns and visibility of their 'Other' fields
             districtSel.innerHTML = '<option value="">Choose District</option>';
             siteSel.innerHTML = '<option value="">Choose District First</option>';
             districtSel.disabled = true;
@@ -510,21 +504,19 @@
             const selectedState = stateSel.value;
             
             if (selectedState && selectedState !== 'Other') {
-                // Filter data to only include districts for the selected state
                 const filteredDistricts = data.filter(item => item.state === selectedState);
                 let districts = getUniqueAndSorted(filteredDistricts, 'district');
                 
-                // Add 'Other' option
                 districts.push('Other');
                 
                 const districtOptions = districts.map(d => `<option value="${d}">${d}</option>`).join('');
                 districtSel.innerHTML += districtOptions;
                 districtSel.disabled = false;
             } else if (selectedState === 'Other') {
-                 // Keep District dropdown disabled
                  districtSel.disabled = true;
                  siteSel.disabled = true;
             }
+            // sendWidgetData() is called by the onchange event in the HTML
         }
         
         function updateSites() {
@@ -532,7 +524,6 @@
             const districtSel = document.getElementById('district');
             const siteSel = document.getElementById('site');
             
-            // Reset Site dropdown and visibility of its 'Other' field
             siteSel.innerHTML = '<option value="">Choose Site</option>';
             siteSel.disabled = true;
             document.getElementById('otherSiteInput').style.display = 'none';
@@ -541,40 +532,79 @@
             const selectedDistrict = districtSel.value;
             
             if (selectedState && selectedDistrict && selectedDistrict !== 'Other') {
-                // Filter data to only include sites for the selected state AND district
                 const filteredSites = data.filter(item => 
                     item.state === selectedState && item.district === selectedDistrict
                 );
                 
                 let sites = getUniqueAndSorted(filteredSites, 'site name');
                 
-                // Add 'Other' option
                 sites.push('Other');
                 
                 const siteOptions = sites.map(s => `<option value="${s}">${s}</option>`).join('');
                 siteSel.innerHTML += siteOptions;
                 siteSel.disabled = false;
             } else if (selectedDistrict === 'Other') {
-                 // Keep Site dropdown disabled
                  siteSel.disabled = true;
             }
+            // sendWidgetData() is called by the onchange event in the HTML
         }
 
-        // --- Submission Logic FIX ---
+        // --- Data Aggregation and Transmission Logic (NEW) ---
         
+        // 1. Helper function to get the current structured data
+        function getWidgetData() {
+            let stateValue = document.getElementById("state").value;
+            let districtValue = document.getElementById("district").value;
+            let siteValue = document.getElementById("site").value;
+
+            // Use the value from the text box if "Other" is selected
+            if (stateValue === 'Other') {
+                stateValue = document.getElementById("otherStateInput").value;
+            }
+
+            if (districtValue === 'Other') {
+                districtValue = document.getElementById("otherDistrictInput").value;
+            }
+            
+            if (siteValue === 'Other') {
+                siteValue = document.getElementById("otherSiteInput").value;
+            }
+            
+            // Create the structured data object
+            const structuredData = {
+                state: stateValue,
+                district: districtValue,
+                site: siteValue
+            };
+
+            // Convert the JavaScript object into a JSON string
+            return JSON.stringify(structuredData);
+        }
+
+        // 2. Function to send data on every change (Clears the "Required" error)
+        function sendWidgetData() {
+            if (typeof JFCustomWidget === 'undefined') {
+                return;
+            }
+            const jsonString = getWidgetData();
+            // sendData tells JotForm the field has content, clearing the error state
+            JFCustomWidget.sendData({ valid: true, value: jsonString });
+        }
+
+
+        // 3. Submission Logic to handle final validation (Called only on final Submit)
         function setupSubmitListener() {
             if (typeof JFCustomWidget === 'undefined') {
                 return;
             }
 
-            // Subscribe to JotForm's submit event
             JFCustomWidget.subscribe('submit', function(e) {
-                let stateValue = document.getElementById("state").value;
-                let districtValue = document.getElementById("district").value;
-                let siteValue = document.getElementById("site").value;
+                const stateDropdownValue = document.getElementById("state").value;
+                const otherStateInputValue = document.getElementById("otherStateInput").value.trim();
+                const finalJsonString = getWidgetData(); 
 
-                // Check for validation error (e.g., first dropdown not selected)
-                if (stateValue === '' || (stateValue === 'Other' && document.getElementById("otherStateInput").value.trim() === '')) {
+                // Check for validation error (State dropdown is empty OR "Other" is selected but the text box is empty)
+                if (stateDropdownValue === '' || (stateDropdownValue === 'Other' && otherStateInputValue === '')) {
                     // Send an invalid result back to JotForm to stop submission
                     JFCustomWidget.sendSubmit({ 
                         valid: false, 
@@ -584,40 +614,17 @@
                     return; // Stop processing
                 }
                 
-                // Use the value from the text box if "Other" is selected
-                if (stateValue === 'Other') {
-                    stateValue = document.getElementById("otherStateInput").value;
-                }
-
-                if (districtValue === 'Other') {
-                    districtValue = document.getElementById("otherDistrictInput").value;
-                }
-                
-                if (siteValue === 'Other') {
-                    siteValue = document.getElementById("otherSiteInput").value;
-                }
-
-                // 1. Create the structured data object
-                const structuredData = {
-                    state: stateValue,
-                    district: districtValue,
-                    site: siteValue
-                };
-
-                // 2. Convert the JavaScript object into a JSON string
-                const jsonString = JSON.stringify(structuredData);
-
-                // 3. Send the final, validated data to JotForm to allow submission
+                // Send the final, validated data to JotForm to allow submission
                 let result = {
                     valid: true,
-                    value: jsonString // Pass the JSON string to JotForm
+                    value: finalJsonString // Pass the JSON string to JotForm
                 };
                 JFCustomWidget.sendSubmit(result);
             });
         }
 
 
-        // --- Initialization ---
+        // --- Initialization (UPDATED) ---
 
         function initialize() {
             const stateSel = document.getElementById('state');
@@ -635,7 +642,10 @@
             // 3. Set up the submission listener
             setupSubmitListener();
 
-            // 4. Request initial resize (important for some browsers)
+            // 4. Send initial data. IMPORTANT: This clears the "required" error immediately on load.
+            sendWidgetData(); 
+
+            // 5. Request initial resize (important for some browsers)
             if (typeof JFCustomWidget !== 'undefined') { 
                 JFCustomWidget.requestFrameResize(); 
             }
