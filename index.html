@@ -618,6 +618,7 @@
         function getFinalValue(selectId, otherInputId) {
             let value = document.getElementById(selectId).value;
             if (value === 'Other') {
+                // Use the input box value, or an empty string if it's still empty
                 return document.getElementById(otherInputId).value.trim();
             }
             return value.trim();
@@ -641,22 +642,17 @@
                 site: finalSite
             };
 
-            // 2. Convert the data to a JSON string (used for the main widget field value)
+            // 2. Convert the data to a JSON string
             const jsonString = JSON.stringify(structuredData);
 
-            // 3. Send the instantaneous validity signal.
+            // 3. Send the definitive signal. This is the only communication to the form.
             JFCustomWidget.sendSubmit({ 
                 valid: isValid,
-                // Ensures the main widget field has a non-empty value when valid
+                // CRITICAL FIX: The value MUST be non-empty when valid, and empty when invalid.
                 value: isValid ? jsonString : ""
             });
             
-            // 4. Send SEPARATE values to the Jotform fields (for display/integration)
-            JFCustomWidget.setFieldsValue([
-                { field: 'widgetState', value: finalState },    
-                { field: 'widgetDistrict', value: finalDistrict }, 
-                { field: 'widgetSite', value: finalSite }      
-            ]);
+            // NOTE: Removed setFieldsValue to eliminate conflicts with external hidden fields.
         }
         
         // --- Initialization and Submission Logic ---
@@ -665,13 +661,10 @@
             
             if (typeof JFCustomWidget !== 'undefined') {
                 
-                // CRITICAL FIX: Subscribe to the submission event and re-send the valid state one last time.
+                // CRITICAL FIX: Re-send validation status on 'submit' event one last time
                 JFCustomWidget.subscribe('submit', function(e) {
-                    // Re-calculate and send the state immediately before the form processes.
                     updateJotformFields();
-                    
-                    // The main form continues with the validation check immediately after this
-                    // function runs, receiving the final, confirmed state.
+                    // Do NOT call e.preventDefault() as this will halt the submission.
                 });
 
                 // Initial invalid state push
