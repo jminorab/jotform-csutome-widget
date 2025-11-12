@@ -69,7 +69,6 @@
     </div>
     <script>
         // The original data array containing all State, District, and Site options
-        // Cleaned version, removing any malformed entries like #VALUE! or missing quotes/commas.
         const data = [
             {"state": "CA", "district": "Alhambra", "site name": "Fremont Elementary"},
             {"state": "CA", "district": "Alhambra", "site name": "Granada Elementary"},
@@ -515,12 +514,10 @@
             {"state": "TX", "district": "Wylie", "site name": "Whitt Elementary School"}
         ];
 
-        // Function to populate a <select> element with options
         function populateSelect(selectId, options, initialText) {
             const select = document.getElementById(selectId);
             select.innerHTML = '';
             
-            // Add initial placeholder option
             const initialOption = document.createElement('option');
             initialOption.value = '';
             initialOption.textContent = initialText;
@@ -528,7 +525,6 @@
             initialOption.selected = true;
             select.appendChild(initialOption);
 
-            // Add all unique data options
             options.forEach(optionText => {
                 if (optionText) {
                     const option = document.createElement('option');
@@ -538,20 +534,17 @@
                 }
             });
             
-            // Add the "Other" option
             const otherOption = document.createElement('option');
             otherOption.value = 'Other';
             otherOption.textContent = 'Other';
             select.appendChild(otherOption);
         }
 
-        // 1. Initial load - populate States
         function initializeStates() {
             const states = [...new Set(data.map(item => item.state))].sort();
             populateSelect('state', states, 'Please choose');
         }
 
-        // 2. State change - populate Districts
         function updateDistricts() {
             const selectedState = document.getElementById('state').value;
             const districtSelect = document.getElementById('district');
@@ -576,7 +569,6 @@
             }
         }
 
-        // 3. District change - populate Sites
         function updateSites() {
             const selectedState = document.getElementById('state').value;
             const selectedDistrict = document.getElementById('district').value;
@@ -598,7 +590,6 @@
             }
         }
 
-        // Logic for showing the "Other" text input
         function toggleOtherInput(field, forceClear = false) {
             const selectElement = document.getElementById(field);
             const inputElement = document.getElementById('other' + field.charAt(0).toUpperCase() + field.slice(1) + 'Input');
@@ -618,12 +609,13 @@
         function getFinalValue(selectId, otherInputId) {
             let value = document.getElementById(selectId).value;
             if (value === 'Other') {
+                // Return the trimmed value from the input field
                 return document.getElementById(otherInputId).value.trim();
             }
+            // Return the trimmed value from the select field
             return value.trim();
         }
 
-        // The function that communicates values and validity back to Jotform
         function updateJotformFields() {
             if (typeof JFCustomWidget !== 'undefined') {
                 
@@ -631,7 +623,7 @@
                 const finalDistrict = getFinalValue("district", "otherDistrictInput");
                 const finalSite = getFinalValue("site", "otherSiteInput");
                 
-                // The widget is only valid if ALL three fields have a non-empty value.
+                // The widget is only valid if ALL three fields have a non-empty value (after trim).
                 const isValid = finalState.length > 0 && finalDistrict.length > 0 && finalSite.length > 0;
 
                 // Send SEPARATE values to the Jotform fields (for display/integration)
@@ -649,19 +641,19 @@
             }
         }
         
-        // --- FIX: Use DOMContentLoaded for initial rendering and loading the options ---
+        // --- FINAL FIX: Use DOMContentLoaded and send signal IMMEDIATELY ---
         document.addEventListener('DOMContentLoaded', function() {
             // 1. Initialize states early, as soon as the DOM is ready.
             initializeStates();
             
             if (typeof JFCustomWidget !== 'undefined') {
-                // 2. CRITICAL FIX: Delay the initial signal to beat the Jotform validation routine.
-                setTimeout(() => {
-                    JFCustomWidget.sendSubmit({ 
-                        valid: false,
-                        value: "Please select a State, District, and Site."
-                    });
-                }, 500); // 500ms delay for maximum safety against early form validation
+                // 2. CRITICAL FIX: Send the explicit invalid signal IMMEDIATELY.
+                // This tells Jotform's required field validation that the widget is handling validation, 
+                // and it is currently 'false' until the user completes the selections.
+                JFCustomWidget.sendSubmit({ 
+                    valid: false,
+                    value: "Please select a State, District, and Site."
+                });
                 
                 // 3. Subscribe to the main form submit event to ensure the latest data is pushed
                 JFCustomWidget.subscribe("submit", function() {
