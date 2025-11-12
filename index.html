@@ -605,7 +605,7 @@
             if (selectElement.value === 'Other' && !forceClear) {
                 inputElement.classList.remove('other-input-hidden');
                 inputElement.setAttribute('required', 'true');
-                // IMPORTANT: Attach update function to oninput of the text box for instant validation
+                // Attach update function to oninput of the text box for instant validation
                 inputElement.oninput = updateJotformFields; 
             } else {
                 inputElement.classList.add('other-input-hidden');
@@ -625,54 +625,58 @@
 
         // The function that communicates values and validity back to Jotform
         function updateJotformFields() {
-            if (typeof JFCustomWidget !== 'undefined') {
-                
-                const finalState = getFinalValue("state", "otherStateInput");
-                const finalDistrict = getFinalValue("district", "otherDistrictInput");
-                const finalSite = getFinalValue("site", "otherSiteInput");
-                
-                // The widget is only valid if ALL three fields have a non-empty value.
-                const isValid = finalState.length > 0 && finalDistrict.length > 0 && finalSite.length > 0;
+            if (typeof JFCustomWidget === 'undefined') return;
 
-                // 1. Create the structured data object
-                const structuredData = {
-                    state: finalState,
-                    district: finalDistrict,
-                    site: finalSite
-                };
+            const finalState = getFinalValue("state", "otherStateInput");
+            const finalDistrict = getFinalValue("district", "otherDistrictInput");
+            const finalSite = getFinalValue("site", "otherSiteInput");
+            
+            // The widget is only valid if ALL three fields have a non-empty value.
+            const isValid = finalState.length > 0 && finalDistrict.length > 0 && finalSite.length > 0;
 
-                // 2. Convert the data to a JSON string
-                const jsonString = JSON.stringify(structuredData);
+            // 1. Create the structured data object
+            const structuredData = {
+                state: finalState,
+                district: finalDistrict,
+                site: finalSite
+            };
 
+            // 2. Convert the data to a JSON string (used for the main widget field value)
+            const jsonString = JSON.stringify(structuredData);
 
-                // 3. Send the validity signal.
-                JFCustomWidget.sendSubmit({ 
-                    valid: isValid,
-                    // CRITICAL FIX: Use the data itself as the value if valid, ensuring it's a non-empty string.
-                    value: isValid ? jsonString : ""
-                });
-                
-                // 4. Send SEPARATE values to the Jotform fields (for display/integration)
-                JFCustomWidget.setFieldsValue([
-                    { field: 'widgetState', value: finalState },    
-                    { field: 'widgetDistrict', value: finalDistrict }, 
-                    { field: 'widgetSite', value: finalSite }      
-                ]);
-
-            }
+            // 3. Send the instantaneous validity signal.
+            JFCustomWidget.sendSubmit({ 
+                valid: isValid,
+                // Ensures the main widget field has a non-empty value when valid
+                value: isValid ? jsonString : ""
+            });
+            
+            // 4. Send SEPARATE values to the Jotform fields (for display/integration)
+            JFCustomWidget.setFieldsValue([
+                { field: 'widgetState', value: finalState },    
+                { field: 'widgetDistrict', value: finalDistrict }, 
+                { field: 'widgetSite', value: finalSite }      
+            ]);
         }
         
-        // --- Initialization ---
+        // --- Initialization and Submission Logic ---
         document.addEventListener('DOMContentLoaded', function() {
             initializeStates();
             
             if (typeof JFCustomWidget !== 'undefined') {
-                // CRITICAL FIX: Delay initial invalid push to ensure Jotform is fully ready to listen.
+                
+                // CRITICAL FIX: Subscribe to the submission event and re-send the valid state one last time.
+                JFCustomWidget.subscribe('submit', function(e) {
+                    // Re-calculate and send the state immediately before the form processes.
+                    updateJotformFields();
+                    
+                    // The main form continues with the validation check immediately after this
+                    // function runs, receiving the final, confirmed state.
+                });
+
+                // Initial invalid state push
                 setTimeout(function() {
-                    JFCustomWidget.sendSubmit({ 
-                        valid: false,
-                        value: "" // Initial state is invalid, value is empty string.
-                    });
+                    updateJotformFields();
                 }, 100); 
             }
         });
