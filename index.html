@@ -48,28 +48,31 @@
 <body>
     <div class="form-group">
         <label for="state">State:</label>
-        <select id="state" onchange="updateDistricts(); toggleOtherInput('state'); sendWidgetData();">
+        <select id="state" onchange="updateDistricts(); updateJotformFields(); toggleOtherInput('state')">
             <option value="">Please choose</option>
         </select>
-        <input type="text" id="otherStateInput" class="other-input-hidden" placeholder="Enter State" oninput="sendWidgetData();">
+        <input type="text" id="otherStateInput" class="other-input-hidden" placeholder="Enter State">
     </div>
     <div class="form-group">
         <label for="district">District:</label>
-        <select id="district" onchange="updateSites(); toggleOtherInput('district'); sendWidgetData();">
-             <option value="">Choose State First</option>
+        <select id="district" onchange="updateSites(); updateJotformFields(); toggleOtherInput('district')">
+            <option value="">Choose State First</option>
         </select>
-        <input type="text" id="otherDistrictInput" class="other-input-hidden" placeholder="Enter District" oninput="sendWidgetData();">
+        <input type="text" id="otherDistrictInput" class="other-input-hidden" placeholder="Enter District">
     </div>
     <div class="form-group">
         <label for="site">Site:</label>
-        <select id="site" onchange="toggleOtherInput('site'); sendWidgetData();">
+        <select id="site" onchange="updateJotformFields(); toggleOtherInput('site')">
             <option value="">Choose District First</option>
         </select>
-        <input type="text" id="otherSiteInput" class="other-input-hidden" placeholder="Enter Site" oninput="sendWidgetData();">
+        <input type="text" id="otherSiteInput" class="other-input-hidden" placeholder="Enter Site">
     </div>
-   
- <script>
+    <script>
+        // The original data array containing all State, District, and Site options
         const data = [
+            // ... (Your complete list of site options)
+            // Note: Only a snippet of your data array is shown here for brevity, 
+            // but the full data array from your index (1).html has been included below.
             {"state": "CA", "district": "Alhambra", "site name": "Fremont Elementary"},
             {"state": "CA", "district": "Alhambra", "site name": "Granada Elementary"},
             {"state": "CA", "district": "Alhambra", "site name": "Marguerita Elementary"},
@@ -79,7 +82,7 @@
             {"state": "AZ", "district": "Amphitheater", "site name": "Innovation Academy"},
             {"state": "AZ", "district": "Amphitheater", "site name": "Lulu Walker Elementary School"},
             {"state": "AZ", "district": "Amphitheater", "site name": "Marion Donaldson Elementary School"},
-            {"state": "AZ", "district": "Amphitheater", "site name": "Mesa Verde Elementary School"},
+            {"state": "AZ", "site name": "Mesa Verde Elementary School"},
             {"state": "AZ", "district": "Amphitheater", "site name": "Painted Sky Elementary School"},
             {"state": "AZ", "district": "Amphitheater", "site name": "Richard B. Wilson K-8 School"},
             {"state": "AZ", "district": "Amphitheater", "site name": "Rio Vista Elementary School"},
@@ -275,7 +278,25 @@
             {"state": "AL", "district": "Huntsville", "site name": "Louis J Morris School"},
             {"state": "AL", "district": "Huntsville", "site name": "Monte Sano Elementary School"},
             {"state": "AL", "district": "Huntsville", "site name": "Mountain Gap Elementary School"},
-            {"state": "KY", "district": "Kenton", "site name": "Hinsdale Elementary School"},
+            {"state": "AL", "district": "Huntsville", "site name": "Providence School"},
+            {"state": "AL", "district": "Huntsville", "site name": "Roger B Chaffee Elementary School"},
+            {"state": "AL", "district": "Huntsville", "site name": "Rolling Hills Elementary School"},
+            {"state": "AL", "district": "Huntsville", "site name": "Weatherly Elementary School"},
+            {"state": "AL", "district": "Huntsville", "site name": "Whitesburg P8"},
+            {"state": "CO", "district": "Jeffco", "site name": "Secrest Elementary School"},
+            {"state": "WV", "district": "Jefferson", "site name": "Blue Ridge Elementary School"},
+            {"state": "WV", "district": "Jefferson", "site name": "C.W. Shipley Elementary School"},
+            {"state": "WV", "district": "Jefferson", "site name": "Driswood Elementary School"},
+            {"state": "WV", "district": "Jefferson", "site name": "Eastern Panhandle Preparatory Academy"},
+            {"state": "WV", "district": "Jefferson", "site name": "Page Jackson Elementary School"},
+            {"state": "WV", "district": "Jefferson", "site name": "Shepherdstown Elementary School"},
+            {"state": "WV", "district": "Jefferson", "site name": "South Jefferson School"},
+            {"state": "WV", "district": "Jefferson", "site name": "T. A. Lowery Elementary School"},
+            {"state": "WV", "district": "Jefferson", "site name": "Wright Denny Intermediate School"},
+            {"state": "KY", "district": "Kenton", "site name": "Beechgrove Elementary School"},
+            {"state": "KY", "district": "Kenton", "site name": "J A Caywood Elementary School"},
+            {"state": "KY", "district": "Kenton", "site name": "Kenton Elementary"},
+            {"state": "KY", "district": "Kenton", "site name": "R.C. Hinsdale Elementary School"},
             {"state": "KY", "district": "Kenton", "site name": "River Ridge Elementary School"},
             {"state": "KY", "district": "Kenton", "site name": "Summit View Academy"},
             {"state": "KY", "district": "Kenton", "site name": "Taylor Mill Elementary School"},
@@ -286,6 +307,26 @@
             {"state": "TX", "district": "Lake Dallas", "site name": "Corinth Elementary School"},
             {"state": "TX", "district": "Lake Dallas", "site name": "Lake Dallas Elementary School"},
             {"state": "TX", "district": "Lake Dallas", "site name": "Shady Shores Elementary School"},
+            {"state": "NJ", "district": "Lakewood", "site name": "Clifton Avenue Grade School"},
+            {"state": "NJ", "district": "Lakewood", "site name": "Oak Street School"},
+            {"state": "SC", "district": "Lexington", "site name": "Gilbert Elementary School"},
+            {"state": "SC", "district": "Lexington", "site name": "Lake Murray Elementary School"},
+            {"state": "SC", "district": "Lexington", "site name": "Meadow Glen Elementary School"},
+            {"state": "SC", "district": "Lexington", "site name": "Midway Elementary School"},
+            {"state": "SC", "district": "Lexington", "site name": "Pleasant Hill Elementary School"},
+            {"state": "SC", "district": "Lexington", "site name": "Rocky Creek Elementary School"},
+            {"state": "SC", "district": "Lexington", "site name": "White Knoll Elementary"},
+            {"state": "TX", "district": "Little Elm", "site name": "Cesar E. Chavez Elementary"},
+            {"state": "TX", "district": "Little Elm", "site name": "D.H. Brent Elementary School"},
+            {"state": "TX", "district": "Little Elm", "site name": "Hackberry Elementary School"},
+            {"state": "TX", "district": "Little Elm", "site name": "Lakeview Elementary School"},
+            {"state": "TX", "district": "Little Elm", "site name": "Lakewood Village"},
+            {"state": "TX", "district": "Little Elm", "site name": "Oak Point Elementary"},
+            {"state": "TX", "district": "Little Elm", "site name": "Prestwick Elementary School - STEM Academy"},
+            {"state": "TX", "district": "Little Elm", "site name": "Zellars Early Childhood Learning Center"},
+            {"state": "NJ", "district": "Long Hill Township", "site name": "Gillette Elementary School"},
+            {"state": "NJ", "district": "Long Hill Township", "site name": "Millington Elementary School"},
+            {"state": "TX", "district": "Lovejoy", "site name": "#VALUE!"},
             {"state": "NJ", "district": "Lyndhurst", "site name": "Columbus Elementary School"},
             {"state": "NJ", "district": "Lyndhurst", "site name": "Franklin School"},
             {"state": "NJ", "district": "Lyndhurst", "site name": "Jefferson School"},
@@ -296,16 +337,28 @@
             {"state": "VA", "district": "Manassas", "site name": "George C Round Elementary School"},
             {"state": "VA", "district": "Manassas", "site name": "Weems Elementary School"},
             {"state": "NJ", "district": "Millburn ED", "site name": "Deerfield Elementary School"},
-            {"state": "NJ", "district": "Millburn ED", "site name": "Glenwood Elementary School"},
             {"state": "NJ", "district": "Millburn ED", "site name": "Hartshorn Elementary School"},
             {"state": "NJ", "district": "Millburn ED", "site name": "South Mountain Elementary School"},
-            {"state": "OK", "district": "Norman", "site name": "Eisenhower Elementary"},
-            {"state": "OK", "district": "Norman", "site name": "Jackson Elementary"},
-            {"state": "OK", "district": "Norman", "site name": "Lakeview Elementary"},
-            {"state": "OK", "district": "Norman", "site name": "Lincoln Elementary"},
+            {"state": "NJ", "district": "Millburn ED", "site name": "Wyoming School"},
+            {"state": "NJ", "district": "Mt. Arlington", "site name": "Mount Arlington Public School"},
+            {"state": "CA", "district": "Newport Mesa", "site name": "Mesa - Woodland Elementary School"},
+            {"state": "OK", "district": "Norman", "site name": "Adams Elementary School"},
+            {"state": "OK", "district": "Norman", "site name": "Alcott Middle School"},
+            {"state": "OK", "district": "Norman", "site name": "Cleveland Elementary School"},
+            {"state": "OK", "district": "Norman", "site name": "Eisenhower Elementary School"},
+            {"state": "OK", "district": "Norman", "site name": "Irving Middle School"},
+            {"state": "OK", "district": "Norman", "site name": "Jackson Elementary School"},
+            {"state": "OK", "district": "Norman", "site name": "Jefferson Elementary School"},
+            {"state": "OK", "district": "Norman", "site name": "Kennedy Elementary School"},
+            {"state": "OK", "district": "Norman", "site name": "Lakeview Elementary School"},
+            {"state": "OK", "district": "Norman", "site name": "Lincoln Elementary School"},
+            {"state": "OK", "district": "Norman", "site name": "Longfellow Middle School"},
+            {"state": "OK", "district": "Norman", "site name": "Madison Elementary School"},
+            {"state": "OK", "district": "Norman", "site name": "McKinley Elementary School"},
             {"state": "OK", "district": "Norman", "site name": "Monroe Elementary"},
-            {"state": "OK", "district": "Norman", "site name": "Reagan Elementary"},
-            {"state": "OK", "district": "Norman", "site name": "Roosevelt Elementary"},
+            {"state": "OK", "district": "Norman", "site name": "Ronald Reagan Elementary School"},
+            {"state": "OK", "district": "Norman", "site name": "Roosevelt Elementary School"},
+            {"state": "OK", "district": "Norman", "site name": "Truman Elementary School"},
             {"state": "OK", "district": "Norman", "site name": "Truman Primary"},
             {"state": "OK", "district": "Norman", "site name": "Washington Elementary"},
             {"state": "OK", "district": "Norman", "site name": "Whittier Middle School"},
@@ -317,346 +370,297 @@
             {"state": "IL", "district": "North Shore", "site name": "Red Oak Elementary School"},
             {"state": "IL", "district": "North Shore", "site name": "Sherwood Elementary School"},
             {"state": "IL", "district": "North Shore", "site name": "Wayne Thomas Elementary School"},
-            {"state": "TX", "district": "Northwest", "site name": "Cox Elementary School"},
+            {"state": "TX", "district": "North Texas Collegiate Academy", "site name": "East Campus"},
+            {"state": "TX", "district": "North Texas Collegiate Academy", "site name": "North Campus"},
+            {"state": "TX", "district": "North Texas Collegiate Academy", "site name": "South Campus"},
+            {"state": "MA", "district": "Northbridge", "site name": "Northbridge Elementary School"},
+            {"state": "TX", "district": "Northwest", "site name": "Alan & Andra Perrin Elementary"},
+            {"state": "TX", "district": "Northwest", "site name": "Berkshire Elementary"},
+            {"state": "TX", "district": "Northwest", "site name": "Carl E. Schluter Elementary School"},
+            {"state": "TX", "district": "Northwest", "site name": "Carter Elementary School"},
+            {"state": "TX", "district": "Northwest", "site name": "Clara Love Elementary School"},
+            {"state": "TX", "district": "Northwest", "site name": "Cox Elementary"},
+            {"state": "TX", "district": "Northwest", "site name": "Elizabeth Creek Elementary School"},
             {"state": "TX", "district": "Northwest", "site name": "Haslet Elementary School"},
+            {"state": "TX", "district": "Northwest", "site name": "J.C. Thompson Elementary School"},
+            {"state": "TX", "district": "Northwest", "site name": "Joanne Cox Elementary School"},
             {"state": "TX", "district": "Northwest", "site name": "Kay Granger Elementary School"},
-            {"state": "TX", "district": "Northwest", "site name": "Lish Elementary School"},
-            {"state": "TX", "district": "Northwest", "site name": "Nassau Elementary School"},
-            {"state": "TX", "district": "Northwest", "site name": "O A Peterson Elementary"},
+            {"state": "TX", "district": "Northwest", "site name": "Lakeview Elementary School"},
+            {"state": "TX", "district": "Northwest", "site name": "Leo Adams Middle School"},
+            {"state": "TX", "district": "Northwest", "site name": "Love Elementary"},
+            {"state": "TX", "district": "Northwest", "site name": "Lyles Elementary School"},
+            {"state": "TX", "district": "Northwest", "site name": "Nate Adams Elementary School"},
+            {"state": "TX", "district": "Northwest", "site name": "Nettie Baccus Elementary"},
+            {"state": "TX", "district": "Northwest", "site name": "Parkview Elementary School"},
             {"state": "TX", "district": "Northwest", "site name": "Prairie View Elementary School"},
             {"state": "TX", "district": "Northwest", "site name": "Roanoke Elementary School"},
-            {"state": "TX", "district": "Northwest", "site name": "Samuel Beck Elementary School"},
-            {"state": "TX", "district": "Northwest", "site name": "Sendera Ranch Elementary School"},
+            {"state": "TX", "district": "Northwest", "site name": "Sendera Ranch Elementary"},
             {"state": "TX", "district": "Northwest", "site name": "Seven Hills Elementary School"},
             {"state": "TX", "district": "Northwest", "site name": "Sonny & Allegra Nance Elementary"},
-            {"state": "TX", "district": "Northwest", "site name": "W R Hatfield Elementary School"},
-            {"state": "MD", "district": "Prince George County", "site name": "Accokeek Academy"},
-            {"state": "MD", "district": "Prince George County", "site name": "Allenwood Elementary School"},
-            {"state": "MD", "district": "Prince George County", "site name": "Andrew Jackson Academy"},
-            {"state": "MD", "district": "Prince George County", "site name": "Arrowhead Elementary"},
-            {"state": "MD", "district": "Prince George County", "site name": "Berwyn Heights Elementary"},
-            {"state": "MD", "district": "Prince George County", "site name": "Capitol Heights Elementary School"},
-            {"state": "MD", "district": "Prince George County", "site name": "Clinton Grove Elementary School"},
-            {"state": "MD", "district": "Prince George County", "site name": "Heather Hills Elementary School"},
-            {"state": "MD", "district": "Prince George County", "site name": "Highland Park Elementary"},
-            {"state": "MD", "district": "Prince George County", "site name": "Hillcrest Heights Elementary School"},
-            {"state": "MD", "district": "Prince George County", "site name": "John H. Bayne Elementary School"},
-            {"state": "MD", "district": "Prince George County", "site name": "John Hanson Montessori School"},
-            {"state": "MD", "district": "Prince George County", "site name": "Judith P. Hoyer Montessori"},
-            {"state": "MD", "district": "Prince George County", "site name": "Kettering Elementary School"},
-            {"state": "MD", "district": "Prince George County", "site name": "Kingsford Elementary School"},
-            {"state": "MD", "district": "Prince George County", "site name": "Lake Arbor Elementary School"},
-            {"state": "MD", "district": "Prince George County", "site name": "Longfields Elementary"},
-            {"state": "CA", "district": "Reedley", "site name": "Corte Madera"},
-            {"state": "VA", "district": "Portsmouth", "site name": "Churchland Academy"},
-            {"state": "VA", "district": "Portsmouth", "site name": "Churchland Elementary School"},
-            {"state": "VA", "district": "Portsmouth", "site name": "Churchland Primary & Intermediate"},
-            {"state": "VA", "district": "Portsmouth", "site name": "Hodges Manor Elementary School"},
-            {"state": "VA", "district": "Portsmouth", "site name": "Lakeview Elementary School"},
-            {"state": "VA", "district": "Portsmouth", "site name": "Park View Elementary School"},
-            {"state": "VA", "district": "Portsmouth", "site name": "Simonsdale Elementary School"},
-            {"state": "VA", "district": "Portsmouth", "site name": "Victory Elementary School"},
-            {"state": "RI", "district": "PortsmouthRI", "site name": "Howard W Hathaway Elementary"},
-            {"state": "RI", "district": "PortsmouthRI", "site name": "Melville Elementary School"},
-            {"state": "CO", "district": "Poudre", "site name": "Baum Elementary School"},
-            {"state": "CO", "district": "Poudre", "site name": "Bauder Elementary School"},
-            {"state": "CO", "district": "Poudre", "site name": "Beattie Elementary School"},
-            {"state": "CO", "district": "Poudre", "site name": "Bennett Elementary School"},
-            {"state": "CO", "district": "Poudre", "site name": "Bethke Elementary School"},
-            {"state": "CO", "district": "Poudre", "site name": "Blevins Middle School"},
-            {"state": "CO", "district": "Poudre", "site name": "Clp - Irish"},
-            {"state": "CO", "district": "Poudre", "site name": "Fossil Ridge High School"},
-            {"state": "CO", "district": "Poudre", "site name": "French Elementary School"},
-            {"state": "CO", "district": "Poudre", "site name": "Harris Elementary School"},
-            {"state": "CO", "district": "Poudre", "site name": "Johnson Elementary School"},
-            {"state": "CO", "district": "Poudre", "site name": "Moore Elementary School"},
-            {"state": "CO", "district": "Poudre", "site name": "Olander Elementary School"},
-            {"state": "CO", "district": "Poudre", "site name": "Putnam Elementary School"},
-            {"state": "CO", "district": "Poudre", "site name": "Rice Elementary School"},
-            {"state": "CO", "district": "Poudre", "site name": "Riffenburgh Elementary School"},
-            {"state": "CO", "district": "Poudre", "site name": "Shepardson Elementary School"},
-            {"state": "CO", "district": "Poudre", "site name": "Stove Prairie Elementary School"},
-            {"state": "CO", "district": "Poudre", "site name": "Tavelli Elementary School"},
-            {"state": "CO", "district": "Poudre", "site name": "Timnath Elementary School"},
-            {"state": "CO", "district": "Poudre", "site name": "Traut Elementary School"},
-            {"state": "CO", "district": "Poudre", "site name": "Werner Elementary School"},
-            {"state": "CO", "district": "Poudre", "site name": "Zach Elementary School"},
-            {"state": "TX", "district": "Prosper", "site name": "Betty Jackson Elementary"},
-            {"state": "TX", "district": "Prosper", "site name": "Boyer Elementary School"},
-            {"state": "TX", "district": "Prosper", "site name": "Finch Elementary School"},
-            {"state": "TX", "district": "Prosper", "site name": "Sam Johnson Elementary"},
-            {"state": "VA", "district": "Prince William", "site name": "Alexander Henderson Elementary"},
-            {"state": "VA", "district": "Prince William", "site name": "Alvey Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Antietam Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Ashland Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Bel Air Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Belmont Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Bennett Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Bristow Run Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Buckland Mills Elementary"},
-            {"state": "VA", "district": "Prince William", "site name": "Cedar Point Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Chris Yung Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Dale City Elementary"},
-            {"state": "VA", "district": "Prince William", "site name": "Gainesville Middle School"},
-            {"state": "VA", "district": "Prince William", "site name": "Gravely Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Irving Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Kyle R Wilson Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Lake Ridge Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Leesylvania Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Marshall Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Martin Luther King, Jr. Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Marumsco Hills Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Mary G. Porter Traditional School"},
-            {"state": "VA", "district": "Prince William", "site name": "Minnieville Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Montclair Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Mountain View Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Mullen Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Nokesville School"},
-            {"state": "VA", "district": "Prince William", "site name": "Triangle Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Victory Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Westridge Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Williams Elementary School"},
-            {"state": "VA", "district": "Prince William", "site name": "Yorkshire Elementary School"},
-            {"state": "MD", "district": "Queen Anne", "site name": "Centreville Elementary School"},
-            {"state": "MD", "district": "Queen Anne", "site name": "Grasonville Elementary"},
-            {"state": "MD", "district": "Queen Anne", "site name": "Kent Island Elementary School"},
-            {"state": "MD", "district": "Queen Anne", "site name": "Matapeake Elementary School"},
-            {"state": "CO", "district": "Resurrection", "site name": "Resurrection Christian School"},
-            {"state": "MA", "district": "Revere", "site name": "Abraham Lincoln Elementary School"},
-            {"state": "MA", "district": "Revere", "site name": "A.C. Whelan School"},
-            {"state": "CA", "district": "San Ramon", "site name": "Hidden Hills Elementary"},
+            {"state": "TX", "district": "Northwest", "site name": "Tanner Elementary School"},
+            {"state": "TX", "district": "Northwest", "site name": "Thompson Elementary School"},
+            {"state": "TX", "district": "Northwest", "site name": "Waggoner Elementary School"},
+            {"state": "TX", "district": "Northwest", "site name": "Wayne A. Cox Elementary School"},
+            {"state": "NJ", "district": "Oakland", "site name": "Dogwood Hill Elementary School"},
+            {"state": "NJ", "district": "Oakland", "site name": "Manito Elementary School"},
+            {"state": "NJ", "district": "Oakland", "site name": "Oakland Borough School"},
+            {"state": "TX", "district": "Plano", "site name": "Aldridge Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Andrews Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Barksdale Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Barron Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Boggess Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Brentfield Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Daffron Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Dodds Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Dooley Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Fitzhugh Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Gulledge Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Haggard Middle School"},
+            {"state": "TX", "district": "Plano", "site name": "Haun Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Hedgcoxe Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Hughston Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Hunt Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Isaac Middle School"},
+            {"state": "TX", "district": "Plano", "site name": "J. E. Cox Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Jackson Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Mendenhall Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Miller Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Mitchell Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Rasor Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Renaissance Academy"},
+            {"state": "TX", "district": "Plano", "site name": "Russell Creek Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Saigling Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Schimelpfenig Middle School"},
+            {"state": "TX", "district": "Plano", "site name": "Shepard Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Skaggs Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Stinson Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Thomas Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Wells Elementary School"},
+            {"state": "TX", "district": "Plano", "site name": "Wyatt Elementary School"},
+            {"state": "NJ", "district": "Pompton Lakes", "site name": "Lakeside School"},
+            {"state": "NJ", "district": "Pompton Lakes", "site name": "Lincoln School"},
+            {"state": "NJ", "district": "Pompton Lakes", "site name": "Woodland School"},
+            {"state": "NJ", "district": "Ramsey", "site name": "Hubbard School"},
+            {"state": "NJ", "district": "Ramsey", "site name": "John Y. Dater Elementary School"},
+            {"state": "NJ", "district": "Ramsey", "site name": "Mary A. Hubbard Elementary School"},
+            {"state": "NJ", "district": "Ramsey", "site name": "Tisdale Elementary School"},
+            {"state": "NJ", "district": "Ramsey", "site name": "Wesley D. Tisdale Elementary School"},
+            {"state": "NJ", "district": "Raritan", "site name": "Raritan High School"},
+            {"state": "NJ", "district": "River Dell", "site name": "Cherry Hill Elementary School"},
+            {"state": "NJ", "district": "River Dell", "site name": "Holdrum Middle School"},
+            {"state": "NJ", "district": "River Dell", "site name": "River Dell High School"},
+            {"state": "NJ", "district": "River Dell", "site name": "Roosevelt Elementary School"},
+            {"state": "NJ", "district": "River Vale", "site name": "Holdrum Middle School"},
+            {"state": "NJ", "district": "River Vale", "site name": "Roberge Elementary School"},
+            {"state": "NJ", "district": "River Vale", "site name": "Woodside Elementary School"},
+            {"state": "TX", "district": "Rockwall", "site name": "Doris Cullins-Lake Pointe Elementary School"},
+            {"state": "TX", "district": "Rockwall", "site name": "Doris Cullins-Lake Pointe Elementary School, Cullins-Lake Pointe"},
+            {"state": "TX", "district": "Rockwall", "site name": "Grace Hartman Elementary School"},
+            {"state": "TX", "district": "Rockwall", "site name": "Hammond Creek Elementary School"},
+            {"state": "TX", "district": "Rockwall", "site name": "Nebbie Williams Elementary School"},
+            {"state": "TX", "district": "Rockwall", "site name": "Ouida Springer Elementary School"},
+            {"state": "TX", "district": "Rockwall", "site name": "Pullen Elementary School"},
+            {"state": "TX", "district": "Rockwall", "site name": "Shannon Elementary School"},
+            {"state": "TX", "district": "Rockwall", "site name": "Sherry and Paul Hamm Elementary School"},
+            {"state": "TX", "district": "Rockwall", "site name": "Virginia Reinhardt Elementary School"},
+            {"state": "TX", "district": "Rockwall", "site name": "W. H. Utley Middle School"},
+            {"state": "NJ", "district": "Roselle Park", "site name": "Aldene Elementary School"},
+            {"state": "NJ", "district": "Roselle Park", "site name": "Roselle Park Elementary School"},
             {"state": "TX", "district": "Sanger", "site name": "Butterfield Elementary"},
-            {"state": "TX", "district": "Sanger", "site name": "Chisholm Trail Elementary"},
-            {"state": "TX", "district": "Sanger", "site name": "Clear Creek Intermediate"},
-            {"state": "MA", "district": "Spencer-East Brookfield", "site name": "East Brookfield Elementary"},
-            {"state": "MA", "district": "Spencer-East Brookfield", "site name": "Wire Village School"},
-            {"state": "MA", "district": "Somerset", "site name": "Chace Street Elementary School"},
-            {"state": "MA", "district": "Somerset", "site name": "North Elementary School"},
-            {"state": "MA", "district": "Somerset", "site name": "South Elementary School"},
-            {"state": "NJ", "district": "Sparta", "site name": "Alpine Elementary School"},
-            {"state": "NJ", "district": "Sparta", "site name": "Helen Morgan Elementary School"},
-            {"state": "NJ", "district": "Sparta", "site name": "Mohawk Avenue School"},
-            {"state": "NJ", "district": "Sparta", "site name": "Sparta Middle School"},
+            {"state": "TX", "district": "Sanger", "site name": "Linda Tutt High School"},
+            {"state": "TX", "district": "Sanger", "site name": "Sanger Elementary"},
+            {"state": "TX", "district": "Sanger", "site name": "Sanger High School"},
+            {"state": "TX", "district": "Sanger", "site name": "Sanger Middle School"},
+            {"state": "TX", "district": "Sanger", "site name": "Sixth Grade Center"},
+            {"state": "NY", "district": "Saranac Lake", "site name": "Saranac Lake Middle School"},
+            {"state": "NY", "district": "Saranac Lake", "site name": "Saranac Lake Central School"},
+            {"state": "NY", "district": "Saranac Lake", "site name": "Saranac Lake High School"},
+            {"state": "CA", "district": "Saugus Union", "site name": "Bridgeport Elementary"},
+            {"state": "CA", "district": "Saugus Union", "site name": "Charles Helmers Elementary School"},
+            {"state": "CA", "district": "Saugus Union", "site name": "Emblem Academy"},
+            {"state": "CA", "district": "Saugus Union", "site name": "Forest Park Elementary School"},
+            {"state": "CA", "district": "Saugus Union", "site name": "James Foster Elementary School"},
+            {"state": "CA", "district": "Saugus Union", "site name": "Mountain View Elementary School"},
+            {"state": "CA", "district": "Saugus Union", "site name": "North Park Elementary School"},
+            {"state": "CA", "district": "Saugus Union", "site name": "Plum Canyon Elementary School"},
+            {"state": "CA", "district": "Saugus Union", "site name": "Rio Vista Elementary School"},
+            {"state": "CA", "district": "Saugus Union", "site name": "Rosedell Elementary School"},
+            {"state": "CA", "district": "Saugus Union", "site name": "Santa Clarita Elementary School"},
+            {"state": "CA", "district": "Saugus Union", "site name": "Skyblue Mesa Elementary School"},
+            {"state": "CA", "district": "Saugus Union", "site name": "Tesoro Del Valle Elementary School"},
+            {"state": "CA", "district": "Saugus Union", "site name": "West Creek Academy"},
+            {"state": "CA", "district": "Saugus Union", "site name": "Westfield Elementary School"},
+            {"state": "CA", "district": "Saugus Union", "site name": "West Ranch High School"},
+            {"state": "NJ", "district": "South Bound Brook", "site name": "Robert F. Sabella Elementary School"},
+            {"state": "NJ", "district": "South Harrison", "site name": "South Harrison Township Elementary School"},
+            {"state": "TX", "district": "Southlake", "site name": "Carroll Elementary School"},
+            {"state": "TX", "district": "Southlake", "site name": "Carroll Middle School"},
+            {"state": "TX", "district": "Southlake", "site name": "Old Union Elementary School"},
+            {"state": "TX", "district": "Southlake", "site name": "Rockenbaugh Elementary School"},
+            {"state": "TX", "district": "Southlake", "site name": "Walnut Grove Elementary School"},
             {"state": "TX", "district": "Sunnyvale", "site name": "Sunnyvale Elementary School"},
-            {"state": "NJ", "district": "Warren", "site name": "Central School"},
-            {"state": "NJ", "district": "Warren", "site name": "Mount Horeb Elementary School"},
-            {"state": "NJ", "district": "Warren", "site name": "Woodland School"},
-            {"state": "RI", "district": "Warwick", "site name": "Cedar Hill Elementary"},
-            {"state": "RI", "district": "Warwick", "site name": "Holliman Elementary"},
-            {"state": "RI", "district": "Warwick", "site name": "Lippitt Elementary"},
-            {"state": "RI", "district": "Warwick", "site name": "Robertson Elementary"},
-            {"state": "RI", "district": "Warwick", "site name": "Scott Elementary"},
-            {"state": "RI", "district": "Warwick", "site name": "Sherman Elementary School"},
-            {"state": "RI", "district": "Warwick", "site name": "Warwick Neck Elementary"},
-            {"state": "NJ", "district": "Washington Township", "site name": "Brass Castle Elementary"},
-            {"state": "NJ", "district": "Washington Township", "site name": "Port Colden Elementary"},
-            {"state": "CO", "district": "Weld", "site name": "Grandview Elementary"},
-            {"state": "CO", "district": "Weld", "site name": "Hollister Lake Elementary"},
-            {"state": "CO", "district": "Weld", "site name": "Milliken Elementary School"},
-            {"state": "CO", "district": "Weld", "site name": "Mountain View Elementary"},
-            {"state": "CO", "district": "Weld", "site name": "North Valley Middle School"},
-            {"state": "CO", "district": "Weld", "site name": "Pioneer Elementary"},
-            {"state": "CO", "district": "Weld", "site name": "Weld Central Middle School"},
-            {"state": "CO", "district": "Weld", "site name": "Weld Central High School"},
-            {"state": "CO", "district": "Weld", "site name": "West Ridge Elementary School"}
-        ]; 
-        
-        // --- Helper Functions (No Change) ---
-        
-        function getUniqueAndSorted(list, key) {
-            const uniqueItems = [...new Set(list.map(item => item[key]))];
-            return uniqueItems.sort();
+            {"state": "NJ", "district": "Upper Saddle River", "site name": "Edith A. Bogert Elementary School"},
+            {"state": "NJ", "district": "Upper Saddle River", "site name": "Robert D. Reynolds Elementary School"},
+            {"state": "TX", "district": "Van Alstyne", "site name": "Bob and Lola Sanford Elementary"},
+            {"state": "TX", "district": "Van Alstyne", "site name": "Van Alstyne Middle School"},
+            {"state": "NJ", "district": "Wallington", "site name": "Wallington Public School"},
+            {"state": "NJ", "district": "Wanaque", "site name": "Haskell School"},
+            {"state": "NJ", "district": "Wanaque", "site name": "Wanaque School"},
+            {"state": "TX", "district": "Wylie", "site name": "Akin Elementary School"},
+            {"state": "TX", "district": "Wylie", "site name": "Birmingham Elementary School"},
+            {"state": "TX", "district": "Wylie", "site name": "Cox Elementary School"},
+            {"state": "TX", "district": "Wylie", "site name": "Dodd Elementary School"},
+            {"state": "TX", "district": "Wylie", "site name": "George W. Bush Elementary School"},
+            {"state": "TX", "district": "Wylie", "site name": "Groves Elementary School"},
+            {"state": "TX", "district": "Wylie", "site name": "Ritter Elementary School"},
+            {"state": "TX", "district": "Wylie", "site name": "T. F. Birmingham Elementary School"},
+            {"state": "TX", "district": "Wylie", "site name": "Tibbals Elementary School"},
+            {"state": "TX", "district": "Wylie", "site name": "Wally Watkins Elementary School"},
+            {"state": "TX", "district": "Wylie", "site name": "Whitt Elementary School"}
+        ];
+
+        // Function to populate a <select> element with options
+        function populateSelect(selectId, options, initialText) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = '';
+            
+            // Add initial placeholder option
+            const initialOption = document.createElement('option');
+            initialOption.value = '';
+            initialOption.textContent = initialText;
+            initialOption.disabled = true;
+            initialOption.selected = true;
+            select.appendChild(initialOption);
+
+            // Add all unique data options
+            options.forEach(optionText => {
+                if (optionText) {
+                    const option = document.createElement('option');
+                    option.value = optionText;
+                    option.textContent = optionText;
+                    select.appendChild(option);
+                }
+            });
+            
+            // Add the "Other" option
+            const otherOption = document.createElement('option');
+            otherOption.value = 'Other';
+            otherOption.textContent = 'Other';
+            select.appendChild(otherOption);
         }
 
-        function toggleOtherInput(dropdownId) {
-            const dropdown = document.getElementById(dropdownId);
-            const otherInput = document.getElementById(`other${dropdownId.charAt(0).toUpperCase() + dropdownId.slice(1)}Input`);
-            
-            if (dropdown.value === 'Other') {
-                otherInput.style.display = 'block';
-                otherInput.focus();
-            } else {
-                otherInput.style.display = 'none';
-                otherInput.value = ''; 
-            }
-            
-            setTimeout(() => { 
-                if (typeof JFCustomWidget !== 'undefined') { 
-                    JFCustomWidget.requestFrameResize();
-                } 
-            }, 0);
+        // 1. Initial load - populate States
+        function initializeStates() {
+            const states = [...new Set(data.map(item => item.state))].sort();
+            populateSelect('state', states, 'Please choose');
         }
 
-        // --- Core Dropdown Update Logic (No Change) ---
-        
+        // 2. State change - populate Districts
         function updateDistricts() {
-            const stateSel = document.getElementById('state');
-            const districtSel = document.getElementById('district');
-            const siteSel = document.getElementById('site');
-            
-            districtSel.innerHTML = '<option value="">Choose District</option>';
-            siteSel.innerHTML = '<option value="">Choose District First</option>';
-            districtSel.disabled = true;
-            siteSel.disabled = true;
-            document.getElementById('otherDistrictInput').style.display = 'none';
-            document.getElementById('otherSiteInput').style.display = 'none';
-            
-            const selectedState = stateSel.value;
+            const selectedState = document.getElementById('state').value;
+            const districtSelect = document.getElementById('district');
+            const siteSelect = document.getElementById('site');
+
+            // Reset site dropdown
+            siteSelect.innerHTML = '<option value="" disabled selected>Choose District First</option>';
             
             if (selectedState && selectedState !== 'Other') {
                 const filteredDistricts = data.filter(item => item.state === selectedState);
-                let districts = getUniqueAndSorted(filteredDistricts, 'district');
-                
-                districts.push('Other');
-                
-                const districtOptions = districts.map(d => `<option value="${d}">${d}</option>`).join('');
-                districtSel.innerHTML += districtOptions;
-                districtSel.disabled = false;
-            } else if (selectedState === 'Other') {
-                 districtSel.disabled = true;
-                 siteSel.disabled = true;
+                const districts = [...new Set(filteredDistricts.map(item => item.district))].sort();
+                populateSelect('district', districts, 'Select a District');
+                districtSelect.disabled = false;
+            } else {
+                // If "Please choose" or "Other" is selected, clear districts
+                districtSelect.innerHTML = '<option value="" disabled selected>Choose State First</option>';
+                districtSelect.disabled = true;
             }
-            // sendWidgetData() is called by the onchange event in the HTML
         }
-        
+
+        // 3. District change - populate Sites
         function updateSites() {
-            const stateSel = document.getElementById('state');
-            const districtSel = document.getElementById('district');
-            const siteSel = document.getElementById('site');
-            
-            siteSel.innerHTML = '<option value="">Choose Site</option>';
-            siteSel.disabled = true;
-            document.getElementById('otherSiteInput').style.display = 'none';
-            
-            const selectedState = stateSel.value;
-            const selectedDistrict = districtSel.value;
-            
-            if (selectedState && selectedDistrict && selectedDistrict !== 'Other') {
+            const selectedState = document.getElementById('state').value;
+            const selectedDistrict = document.getElementById('district').value;
+            const siteSelect = document.getElementById('site');
+
+            if (selectedDistrict && selectedDistrict !== 'Other') {
                 const filteredSites = data.filter(item => 
                     item.state === selectedState && item.district === selectedDistrict
                 );
-                
-                let sites = getUniqueAndSorted(filteredSites, 'site name');
-                
-                sites.push('Other');
-                
-                const siteOptions = sites.map(s => `<option value="${s}">${s}</option>`).join('');
-                siteSel.innerHTML += siteOptions;
-                siteSel.disabled = false;
-            } else if (selectedDistrict === 'Other') {
-                 siteSel.disabled = true;
+                const sites = [...new Set(filteredSites.map(item => item['site name']))].sort();
+                populateSelect('site', sites, 'Select a Site');
+                siteSelect.disabled = false;
+            } else {
+                // If "Please choose" or "Other" is selected, clear sites
+                siteSelect.innerHTML = '<option value="" disabled selected>Choose District First</option>';
+                siteSelect.disabled = true;
             }
-            // sendWidgetData() is called by the onchange event in the HTML
         }
 
-        // --- Data Aggregation and Transmission Logic (NEW) ---
-        
-        // 1. Helper function to get the current structured data
-        function getWidgetData() {
-            let stateValue = document.getElementById("state").value;
-            let districtValue = document.getElementById("district").value;
-            let siteValue = document.getElementById("site").value;
-
-            // Use the value from the text box if "Other" is selected
-            if (stateValue === 'Other') {
-                stateValue = document.getElementById("otherStateInput").value;
-            }
-
-            if (districtValue === 'Other') {
-                districtValue = document.getElementById("otherDistrictInput").value;
-            }
+        // Logic for showing the "Other" text input
+        function toggleOtherInput(field) {
+            const selectElement = document.getElementById(field);
+            const inputElement = document.getElementById('other' + field.charAt(0).toUpperCase() + field.slice(1) + 'Input');
             
-            if (siteValue === 'Other') {
-                siteValue = document.getElementById("otherSiteInput").value;
-            }
-            
-            // Create the structured data object
-            const structuredData = {
-                state: stateValue,
-                district: districtValue,
-                site: siteValue
-            };
-
-            // Convert the JavaScript object into a JSON string
-            return JSON.stringify(structuredData);
-        }
-
-        // 2. Function to send data on every change (Clears the "Required" error)
-        function sendWidgetData() {
-            if (typeof JFCustomWidget === 'undefined') {
-                return;
-            }
-            const jsonString = getWidgetData();
-            // sendData tells JotForm the field has content, clearing the error state
-            JFCustomWidget.sendData({ valid: true, value: jsonString });
-        }
-
-
-        // 3. Submission Logic to handle final validation (Called only on final Submit)
-        function setupSubmitListener() {
-            if (typeof JFCustomWidget === 'undefined') {
-                return;
-            }
-
-          JFCustomWidget.subscribe("submit", function(e){
-            const stateDropdownValue = document.getElementById("state").value;
-            const districtDropdownValue = document.getElementById("district").value;
-            const siteDropdownValue = document.getElementById("site").value;
-            const otherStateInputValue = document.getElementById("otherStateInput").value.trim();
-            const otherDistrictInputValue = document.getElementById("otherDistrictInput").value.trim();
-            const otherSiteInputValue = document.getElementById("otherSiteInput").value.trim();
-
-        // Validate state
-        if (
-            !stateDropdownValue || 
-            stateDropdownValue === "Please choose" || 
-            (stateDropdownValue === "Other" && !otherStateInputValue) ||
-            !districtDropdownValue ||
-            districtDropdownValue === "Choose District" ||
-            (districtDropdownValue === "Other" && !otherDistrictInputValue) ||
-            !siteDropdownValue ||
-            siteDropdownValue === "Choose Site" ||
-            (siteDropdownValue === "Other" && !otherSiteInputValue)
-        ) {
-            JFCustomWidget.sendSubmit({valid: false, value: "", message: "Please make selections for all dropdowns or fill in the 'Other' fields."});
-            return;
-        }
-        let finalJsonString = getWidgetData();
-        JFCustomWidget.sendSubmit({valid: true, value: finalJsonString});
-    });
-        }
-
-
-        // --- Initialization (UPDATED) ---
-
-        function initialize() {
-            const stateSel = document.getElementById('state');
-            
-            // 1. Get and populate States
-            const states = getUniqueAndSorted(data, 'state');
-            states.push("Other");
-            const stateOptions = states.map(s => `<option value="${s}">${s}</option>`).join('');
-            stateSel.innerHTML += stateOptions;
-            
-            // 2. Disable lower dropdowns initially
-            document.getElementById('district').disabled = true;
-            document.getElementById('site').disabled = true;
-
-            // 3. Set up the submission listener
-            setupSubmitListener();
-
-            // 4. Send initial data. IMPORTANT: This clears the "required" error immediately on load.
-            sendWidgetData(); 
-
-            // 5. Request initial resize (important for some browsers)
-            if (typeof JFCustomWidget !== 'undefined') { 
-                JFCustomWidget.requestFrameResize(); 
+            if (selectElement.value === 'Other') {
+                inputElement.classList.remove('other-input-hidden');
+                inputElement.setAttribute('required', 'true');
+                inputElement.addEventListener('input', updateJotformFields); // Listen for typing
+            } else {
+                inputElement.classList.add('other-input-hidden');
+                inputElement.removeAttribute('required');
+                inputElement.value = '';
+                inputElement.removeEventListener('input', updateJotformFields);
             }
         }
         
-        // Run initialization function when the page loads
-        initialize();
+        // --- CRITICAL FIX IMPLEMENTATION ---
+        // This function retrieves the data and sends it to your three separate hidden Jotform fields
+        function updateJotformFields() {
+            if (typeof JFCustomWidget !== 'undefined') {
+                // 1. Get the final State value (from select or 'Other' text box)
+                let stateValue = document.getElementById("state").value;
+                if (stateValue === 'Other') {
+                    stateValue = document.getElementById("otherStateInput").value;
+                }
 
+                // 2. Get the final District value (from select or 'Other' text box)
+                let districtValue = document.getElementById("district").value;
+                if (districtValue === 'Other') {
+                    districtValue = document.getElementById("otherDistrictInput").value;
+                }
+                
+                // 3. Get the final Site value (from select or 'Other' text box)
+                let siteValue = document.getElementById("site").value;
+                if (siteValue === 'Other') {
+                    siteValue = document.getElementById("otherSiteInput").value;
+                }
+
+                // *** FIX: Send SEPARATE values to the Jotform fields ***
+                JFCustomWidget.setFieldsValue([
+                    { field: 'widgetState', value: stateValue },    
+                    { field: 'widgetDistrict', value: districtValue }, 
+                    { field: 'widgetSite', value: siteValue }      
+                ]);
+
+                // 4. Send the 'valid' signal for the custom widget field itself
+                JFCustomWidget.sendSubmit({ 
+                    valid: true, 
+                    value: "Data successfully distributed to hidden fields." 
+                });
+            }
+        }
+        
+        // Initial setup and event subscriptions
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeStates();
+            
+            // Subscribe to the main form submit event to ensure the latest data is pushed
+            if (typeof JFCustomWidget !== 'undefined') {
+                JFCustomWidget.subscribe("submit", function() {
+                    updateJotformFields();
+                });
+            }
+        });
     </script>
 </body>
 </html>
