@@ -70,9 +70,6 @@
     <script>
         // The original data array containing all State, District, and Site options
         const data = [
-            // ... (Your complete list of site options)
-            // Note: Only a snippet of your data array is shown here for brevity, 
-            // but the full data array from your index (1).html has been included below.
             {"state": "CA", "district": "Alhambra", "site name": "Fremont Elementary"},
             {"state": "CA", "district": "Alhambra", "site name": "Granada Elementary"},
             {"state": "CA", "district": "Alhambra", "site name": "Marguerita Elementary"},
@@ -561,8 +558,10 @@
             const districtSelect = document.getElementById('district');
             const siteSelect = document.getElementById('site');
 
-            // Reset site dropdown
+            // Reset site dropdown and clear any 'Other' input
             siteSelect.innerHTML = '<option value="" disabled selected>Choose District First</option>';
+            siteSelect.value = '';
+            toggleOtherInput('site', true); // Force hide and clear site 'Other' input
             
             if (selectedState && selectedState !== 'Other') {
                 const filteredDistricts = data.filter(item => item.state === selectedState);
@@ -574,6 +573,7 @@
                 districtSelect.innerHTML = '<option value="" disabled selected>Choose State First</option>';
                 districtSelect.disabled = true;
             }
+            toggleOtherInput('district', true); // Force hide and clear district 'Other' input
         }
 
         // 3. District change - populate Sites
@@ -594,29 +594,31 @@
                 siteSelect.innerHTML = '<option value="" disabled selected>Choose District First</option>';
                 siteSelect.disabled = true;
             }
+            toggleOtherInput('site', true); // Force hide and clear site 'Other' input
         }
 
         // Logic for showing the "Other" text input
-        function toggleOtherInput(field) {
+        function toggleOtherInput(field, forceClear = false) {
             const selectElement = document.getElementById(field);
             const inputElement = document.getElementById('other' + field.charAt(0).toUpperCase() + field.slice(1) + 'Input');
             
-            if (selectElement.value === 'Other') {
+            if (selectElement.value === 'Other' && !forceClear) {
                 inputElement.classList.remove('other-input-hidden');
                 inputElement.setAttribute('required', 'true');
-                inputElement.addEventListener('input', updateJotformFields); // Listen for typing
+                // Ensure we are listening for typing in the 'Other' box
+                inputElement.oninput = updateJotformFields; 
             } else {
                 inputElement.classList.add('other-input-hidden');
                 inputElement.removeAttribute('required');
-                inputElement.value = '';
-                inputElement.removeEventListener('input', updateJotformFields);
+                inputElement.value = ''; // Clear the input
+                inputElement.oninput = null; // Remove the listener
             }
         }
         
-        // --- CRITICAL FIX IMPLEMENTATION ---
-        // This function retrieves the data and sends it to your three separate hidden Jotform fields
+        // --- CRITICAL FIX IMPLEMENTATION & VALIDATION ---
         function updateJotformFields() {
             if (typeof JFCustomWidget !== 'undefined') {
+                
                 // 1. Get the final State value (from select or 'Other' text box)
                 let stateValue = document.getElementById("state").value;
                 if (stateValue === 'Other') {
@@ -635,17 +637,21 @@
                     siteValue = document.getElementById("otherSiteInput").value;
                 }
 
-                // *** FIX: Send SEPARATE values to the Jotform fields ***
+                // *** NEW VALIDATION LOGIC ***
+                // Check if all three values are non-empty. This is required to clear the Jotform "required" error.
+                const isValid = stateValue && districtValue && siteValue;
+
+                // Send SEPARATE values to the Jotform fields regardless of validity
                 JFCustomWidget.setFieldsValue([
                     { field: 'widgetState', value: stateValue },    
                     { field: 'widgetDistrict', value: districtValue }, 
                     { field: 'widgetSite', value: siteValue }      
                 ]);
 
-                // 4. Send the 'valid' signal for the custom widget field itself
+                // Send the validity signal based on the check
                 JFCustomWidget.sendSubmit({ 
-                    valid: true, 
-                    value: "Data successfully distributed to hidden fields." 
+                    valid: !!isValid, // If isValid is true, this sends valid: true
+                    value: !!isValid ? "Data sent to hidden fields." : "Incomplete data. Please complete all fields." 
                 });
             }
         }
