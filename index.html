@@ -55,14 +55,14 @@
     </div>
     <div class="form-group">
         <label for="district">District:</label>
-        <select id="district" onchange="updateSites(); updateJotformFields(); toggleOtherInput('district')">
+        <select id="district" onchange="updateSites(); updateJotformFields(); toggleOtherInput('district')" disabled>
             <option value="">Choose State First</option>
         </select>
         <input type="text" id="otherDistrictInput" class="other-input-hidden" placeholder="Enter District">
     </div>
     <div class="form-group">
         <label for="site">Site:</label>
-        <select id="site" onchange="updateJotformFields(); toggleOtherInput('site')">
+        <select id="site" onchange="updateJotformFields(); toggleOtherInput('site')" disabled>
             <option value="">Choose District First</option>
         </select>
         <input type="text" id="otherSiteInput" class="other-input-hidden" placeholder="Enter Site">
@@ -521,7 +521,7 @@
             const select = document.getElementById(selectId);
             select.innerHTML = '';
             
-            // Add initial placeholder option
+            // Add initial placeholder option, this is required for validation
             const initialOption = document.createElement('option');
             initialOption.value = '';
             initialOption.textContent = initialText;
@@ -558,22 +558,23 @@
             const districtSelect = document.getElementById('district');
             const siteSelect = document.getElementById('site');
 
-            // Reset site dropdown and clear any 'Other' input
+            // Reset secondary dropdowns and clear their values
             siteSelect.innerHTML = '<option value="" disabled selected>Choose District First</option>';
             siteSelect.value = '';
-            toggleOtherInput('site', true); // Force hide and clear site 'Other' input
+            toggleOtherInput('site', true);
             
+            districtSelect.value = '';
+            toggleOtherInput('district', true);
+
             if (selectedState && selectedState !== 'Other') {
                 const filteredDistricts = data.filter(item => item.state === selectedState);
                 const districts = [...new Set(filteredDistricts.map(item => item.district))].sort();
                 populateSelect('district', districts, 'Select a District');
                 districtSelect.disabled = false;
             } else {
-                // If "Please choose" or "Other" is selected, clear districts
                 districtSelect.innerHTML = '<option value="" disabled selected>Choose State First</option>';
                 districtSelect.disabled = true;
             }
-            toggleOtherInput('district', true); // Force hide and clear district 'Other' input
         }
 
         // 3. District change - populate Sites
@@ -581,6 +582,9 @@
             const selectedState = document.getElementById('state').value;
             const selectedDistrict = document.getElementById('district').value;
             const siteSelect = document.getElementById('site');
+
+            siteSelect.value = '';
+            toggleOtherInput('site', true);
 
             if (selectedDistrict && selectedDistrict !== 'Other') {
                 const filteredSites = data.filter(item => 
@@ -590,11 +594,9 @@
                 populateSelect('site', sites, 'Select a Site');
                 siteSelect.disabled = false;
             } else {
-                // If "Please choose" or "Other" is selected, clear sites
                 siteSelect.innerHTML = '<option value="" disabled selected>Choose District First</option>';
                 siteSelect.disabled = true;
             }
-            toggleOtherInput('site', true); // Force hide and clear site 'Other' input
         }
 
         // Logic for showing the "Other" text input
@@ -605,7 +607,7 @@
             if (selectElement.value === 'Other' && !forceClear) {
                 inputElement.classList.remove('other-input-hidden');
                 inputElement.setAttribute('required', 'true');
-                // Ensure we are listening for typing in the 'Other' box
+                // Listen for typing in the 'Other' box
                 inputElement.oninput = updateJotformFields; 
             } else {
                 inputElement.classList.add('other-input-hidden');
@@ -615,43 +617,46 @@
             }
         }
         
-        // --- CRITICAL FIX IMPLEMENTATION & VALIDATION ---
+        // --- CRITICAL FIX: VALIDATION AND WIDGET COMMS ---
         function updateJotformFields() {
             if (typeof JFCustomWidget !== 'undefined') {
                 
-                // 1. Get the final State value (from select or 'Other' text box)
+                // 1. Get the final values from the selects OR the 'Other' inputs
                 let stateValue = document.getElementById("state").value;
                 if (stateValue === 'Other') {
                     stateValue = document.getElementById("otherStateInput").value;
                 }
 
-                // 2. Get the final District value (from select or 'Other' text box)
                 let districtValue = document.getElementById("district").value;
                 if (districtValue === 'Other') {
                     districtValue = document.getElementById("otherDistrictInput").value;
                 }
                 
-                // 3. Get the final Site value (from select or 'Other' text box)
                 let siteValue = document.getElementById("site").value;
                 if (siteValue === 'Other') {
                     siteValue = document.getElementById("otherSiteInput").value;
                 }
 
-                // *** NEW VALIDATION LOGIC ***
-                // Check if all three values are non-empty. This is required to clear the Jotform "required" error.
-                const isValid = stateValue && districtValue && siteValue;
+                // *** NEW VALIDATION LOGIC: Trim the values to ensure no whitespace error ***
+                const finalState = stateValue ? stateValue.trim() : '';
+                const finalDistrict = districtValue ? districtValue.trim() : '';
+                const finalSite = siteValue ? siteValue.trim() : '';
+                
+                // The widget is only valid if ALL three fields have a non-empty, non-placeholder value.
+                const isValid = finalState.length > 0 && finalDistrict.length > 0 && finalSite.length > 0;
 
-                // Send SEPARATE values to the Jotform fields regardless of validity
+                // Send SEPARATE values to the Jotform fields
                 JFCustomWidget.setFieldsValue([
-                    { field: 'widgetState', value: stateValue },    
-                    { field: 'widgetDistrict', value: districtValue }, 
-                    { field: 'widgetSite', value: siteValue }      
+                    { field: 'widgetState', value: finalState },    
+                    { field: 'widgetDistrict', value: finalDistrict }, 
+                    { field: 'widgetSite', value: finalSite }      
                 ]);
 
-                // Send the validity signal based on the check
+                // Send the validity signal based on the check.
+                // NOTE: We only send the signal here. The initial signal is sent on load.
                 JFCustomWidget.sendSubmit({ 
-                    valid: !!isValid, // If isValid is true, this sends valid: true
-                    value: !!isValid ? "Data sent to hidden fields." : "Incomplete data. Please complete all fields." 
+                    valid: isValid,
+                    value: isValid ? "Data is complete." : "Please complete all fields to proceed."
                 });
             }
         }
@@ -660,8 +665,16 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeStates();
             
-            // Subscribe to the main form submit event to ensure the latest data is pushed
+            // *** CRITICAL STEP 2: Initial signal sent after a delay ***
+            // This tells Jotform the initial state is invalid (until selections are made) but prevents the initial, immediate "required" error.
             if (typeof JFCustomWidget !== 'undefined') {
+                setTimeout(() => {
+                    JFCustomWidget.sendSubmit({ 
+                        valid: false,
+                        value: "Please select State, District, and Site."
+                    });
+                }, 500); // 500ms delay to allow Jotform to load properly
+                
                 JFCustomWidget.subscribe("submit", function() {
                     updateJotformFields();
                 });
