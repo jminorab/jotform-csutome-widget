@@ -69,6 +69,7 @@
     </div>
     <script>
         // The original data array containing all State, District, and Site options
+        // Cleaned version, removing any malformed entries like #VALUE! or missing quotes/commas.
         const data = [
             {"state": "CA", "district": "Alhambra", "site name": "Fremont Elementary"},
             {"state": "CA", "district": "Alhambra", "site name": "Granada Elementary"},
@@ -79,7 +80,6 @@
             {"state": "AZ", "district": "Amphitheater", "site name": "Innovation Academy"},
             {"state": "AZ", "district": "Amphitheater", "site name": "Lulu Walker Elementary School"},
             {"state": "AZ", "district": "Amphitheater", "site name": "Marion Donaldson Elementary School"},
-            // NOTE: Removed the malformed AZ entry from previous fix attempt, keeping other AZ data as is for now.
             {"state": "AZ", "district": "Amphitheater", "site name": "Painted Sky Elementary School"},
             {"state": "AZ", "district": "Amphitheater", "site name": "Richard B. Wilson K-8 School"},
             {"state": "AZ", "district": "Amphitheater", "site name": "Rio Vista Elementary School"},
@@ -323,7 +323,6 @@
             {"state": "TX", "district": "Little Elm", "site name": "Zellars Early Childhood Learning Center"},
             {"state": "NJ", "district": "Long Hill Township", "site name": "Gillette Elementary School"},
             {"state": "NJ", "district": "Long Hill Township", "site name": "Millington Elementary School"},
-            // NOTE: Removed the malformed TX entry from previous fix attempt.
             {"state": "NJ", "district": "Lyndhurst", "site name": "Columbus Elementary School"},
             {"state": "NJ", "district": "Lyndhurst", "site name": "Franklin School"},
             {"state": "NJ", "district": "Lyndhurst", "site name": "Jefferson School"},
@@ -342,7 +341,7 @@
             {"state": "OK", "district": "Norman", "site name": "Adams Elementary School"},
             {"state": "OK", "district": "Norman", "site name": "Alcott Middle School"},
             {"state": "OK", "district": "Norman", "site name": "Cleveland Elementary School"},
-            {"state", "district": "Norman", "site name": "Eisenhower Elementary School"},
+            {"state": "OK", "district": "Norman", "site name": "Eisenhower Elementary School"},
             {"state": "OK", "district": "Norman", "site name": "Irving Middle School"},
             {"state": "OK", "district": "Norman", "site name": "Jackson Elementary School"},
             {"state": "OK", "district": "Norman", "site name": "Jefferson Elementary School"},
@@ -516,10 +515,12 @@
             {"state": "TX", "district": "Wylie", "site name": "Whitt Elementary School"}
         ];
 
+        // Function to populate a <select> element with options
         function populateSelect(selectId, options, initialText) {
             const select = document.getElementById(selectId);
             select.innerHTML = '';
             
+            // Add initial placeholder option
             const initialOption = document.createElement('option');
             initialOption.value = '';
             initialOption.textContent = initialText;
@@ -527,6 +528,7 @@
             initialOption.selected = true;
             select.appendChild(initialOption);
 
+            // Add all unique data options
             options.forEach(optionText => {
                 if (optionText) {
                     const option = document.createElement('option');
@@ -536,17 +538,20 @@
                 }
             });
             
+            // Add the "Other" option
             const otherOption = document.createElement('option');
             otherOption.value = 'Other';
             otherOption.textContent = 'Other';
             select.appendChild(otherOption);
         }
 
+        // 1. Initial load - populate States
         function initializeStates() {
             const states = [...new Set(data.map(item => item.state))].sort();
             populateSelect('state', states, 'Please choose');
         }
 
+        // 2. State change - populate Districts
         function updateDistricts() {
             const selectedState = document.getElementById('state').value;
             const districtSelect = document.getElementById('district');
@@ -571,6 +576,7 @@
             }
         }
 
+        // 3. District change - populate Sites
         function updateSites() {
             const selectedState = document.getElementById('state').value;
             const selectedDistrict = document.getElementById('district').value;
@@ -592,6 +598,7 @@
             }
         }
 
+        // Logic for showing the "Other" text input
         function toggleOtherInput(field, forceClear = false) {
             const selectElement = document.getElementById(field);
             const inputElement = document.getElementById('other' + field.charAt(0).toUpperCase() + field.slice(1) + 'Input');
@@ -611,14 +618,12 @@
         function getFinalValue(selectId, otherInputId) {
             let value = document.getElementById(selectId).value;
             if (value === 'Other') {
-                // Return the trimmed value from the input field
                 return document.getElementById(otherInputId).value.trim();
             }
-            // Return the trimmed value from the select field
             return value.trim();
         }
 
-        // *** CRITICAL FIX: The logic now sends data AND the valid status ***
+        // The function that communicates values and validity back to Jotform
         function updateJotformFields() {
             if (typeof JFCustomWidget !== 'undefined') {
                 
@@ -644,21 +649,21 @@
             }
         }
         
-        // *** CRITICAL FIX: Delaying Initial Validation Signal ***
-        window.addEventListener('load', function() {
+        // --- FIX: Use DOMContentLoaded for initial rendering and loading the options ---
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. Initialize states early, as soon as the DOM is ready.
             initializeStates();
             
-            // This is the true fix: Delay the initial signal *after* the whole page (including Jotform's parent frame) has loaded.
             if (typeof JFCustomWidget !== 'undefined') {
+                // 2. CRITICAL FIX: Delay the initial signal to beat the Jotform validation routine.
                 setTimeout(() => {
-                    // Send an explicit invalid signal on load to force Jotform to wait for a selection.
                     JFCustomWidget.sendSubmit({ 
                         valid: false,
                         value: "Please select a State, District, and Site."
                     });
-                }, 100); // Reduce delay to the minimum safe time after load event
+                }, 500); // 500ms delay for maximum safety against early form validation
                 
-                // Subscribe to the main form submit event to ensure the latest data is pushed
+                // 3. Subscribe to the main form submit event to ensure the latest data is pushed
                 JFCustomWidget.subscribe("submit", function() {
                     updateJotformFields();
                 });
