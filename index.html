@@ -605,7 +605,7 @@
             if (selectElement.value === 'Other' && !forceClear) {
                 inputElement.classList.remove('other-input-hidden');
                 inputElement.setAttribute('required', 'true');
-                // CRITICAL FIX: Attach update function to oninput of the text box
+                // IMPORTANT: Attach update function to oninput of the text box for instant validation
                 inputElement.oninput = updateJotformFields; 
             } else {
                 inputElement.classList.add('other-input-hidden');
@@ -634,19 +634,31 @@
                 // The widget is only valid if ALL three fields have a non-empty value.
                 const isValid = finalState.length > 0 && finalDistrict.length > 0 && finalSite.length > 0;
 
-                // 1. Send SEPARATE values to the Jotform fields (for display/integration)
+                // 1. Create the structured data object
+                const structuredData = {
+                    state: finalState,
+                    district: finalDistrict,
+                    site: finalSite
+                };
+
+                // 2. Convert the data to a JSON string
+                const jsonString = JSON.stringify(structuredData);
+
+
+                // 3. Send the validity signal.
+                JFCustomWidget.sendSubmit({ 
+                    valid: isValid,
+                    // CRITICAL FIX: Use the data itself as the value if valid, ensuring it's a non-empty string.
+                    value: isValid ? jsonString : ""
+                });
+                
+                // 4. Send SEPARATE values to the Jotform fields (for display/integration)
                 JFCustomWidget.setFieldsValue([
                     { field: 'widgetState', value: finalState },    
                     { field: 'widgetDistrict', value: finalDistrict }, 
                     { field: 'widgetSite', value: finalSite }      
                 ]);
 
-                // 2. Send the validity signal based on the check.
-                // This is the CRITICAL STEP that prevents the submission error.
-                JFCustomWidget.sendSubmit({ 
-                    valid: isValid,
-                    value: isValid ? "Data is complete." : "Please complete all required fields."
-                });
             }
         }
         
@@ -654,9 +666,15 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeStates();
             
-            // CRITICAL FIX: The explicit submit subscription is removed.
-            // We rely entirely on the instantaneous 'onchange' and 'oninput' events 
-            // to send the final valid state before the user can click the main submit button.
+            if (typeof JFCustomWidget !== 'undefined') {
+                // CRITICAL FIX: Delay initial invalid push to ensure Jotform is fully ready to listen.
+                setTimeout(function() {
+                    JFCustomWidget.sendSubmit({ 
+                        valid: false,
+                        value: "" // Initial state is invalid, value is empty string.
+                    });
+                }, 100); 
+            }
         });
     </script>
 </body>
