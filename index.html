@@ -642,6 +642,7 @@
                 ]);
 
                 // 2. Send the validity signal based on the check.
+                // This is the CRITICAL STEP that prevents the submission error.
                 JFCustomWidget.sendSubmit({ 
                     valid: isValid,
                     value: isValid ? "Data is complete." : "Please complete all required fields."
@@ -651,18 +652,11 @@
         
         // --- Initialization ---
         document.addEventListener('DOMContentLoaded', function() {
-            // 1. Initialize states early, as soon as the DOM is ready.
             initializeStates();
             
-            if (typeof JFCustomWidget !== 'undefined') {
-                // IMPORTANT: Removed initial JFCustomWidget.sendSubmit({ valid: false, ... }) 
-                // to avoid the race condition error. Validity now relies purely on user input.
-                
-                // 2. Subscribe to the main form submit event to ensure the latest data is pushed
-                JFCustomWidget.subscribe("submit", function() {
-                    updateJotformFields();
-                });
-            }
+            // CRITICAL FIX: The explicit submit subscription is removed.
+            // We rely entirely on the instantaneous 'onchange' and 'oninput' events 
+            // to send the final valid state before the user can click the main submit button.
         });
     </script>
 </body>
