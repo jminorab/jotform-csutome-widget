@@ -625,23 +625,31 @@
         }
 
         // The function that communicates values and validity back to Jotform
-        function updateJotformFields() {
-            if (typeof JFCustomWidget === 'undefined') return;
+       function updateJotformFields() {
+          if (typeof JFCustomWidget === "undefined") return;
 
-            const finalState = getFinalValue("state", "otherStateInput");
-            const finalDistrict = getFinalValue("district", "otherDistrictInput");
-            const finalSite = getFinalValue("site", "otherSiteInput");
-            
-            // The widget is only valid if ALL three fields have a non-empty value.
-            const isValid = finalState.length > 0 && finalDistrict.length > 0 && finalSite.length > 0;
+          const finalState = getFinalValue('state', 'otherStateInput');
+          const finalDistrict = getFinalValue('district', 'otherDistrictInput');
+          const finalSite = getFinalValue('site', 'otherSiteInput');
+    
+          const isValid = finalState.length > 0 && finalDistrict.length > 0 && finalSite.length > 0;
 
-        const outputText =
-              `State: ${finalState}; District: ${finalDistrict}; Site: ${finalSite}`;
-                JFCustomWidget.sendSubmit({valid: isValid, value: isValid ? outputText : ""});
+  // Feed values to dedicated fields you added in JotForm:
+          JFCustomWidget.setFieldsValue({
+            widgetState: finalState,
+            widgetDistrict: finalDistrict,
+            widgetSite: finalSite
+          });
 
-          
-            // NOTE: Removed setFieldsValue to eliminate conflicts with external hidden fields.
-        }
+  // Widget's own value is less important now, but keep for legacy:
+  const outputText =
+    `State: ${finalState}; District: ${finalDistrict}; Site: ${finalSite}`;
+  JFCustomWidget.sendSubmit({
+    valid: isValid,
+    value: isValid ? outputText : ""
+  });
+}
+
         
         // --- Initialization and Submission Logic ---
         document.addEventListener('DOMContentLoaded', function() {
