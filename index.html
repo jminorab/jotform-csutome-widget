@@ -8,16 +8,11 @@
     .form-group { display: flex; flex-direction: column; margin-bottom: 1rem; }
     label { margin-bottom: 0.5rem; font-weight: bold; color: #555; }
     select, input[type=text] {
-      padding: 0.75rem;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      background-color: #fff;
-      font-size: 1rem;
-      cursor: pointer;
+      padding: 0.75rem; border: 1px solid #ccc; border-radius: 8px;
+      background-color: #fff; font-size: 1rem; cursor: pointer;
     }
     select:focus, input[type=text]:focus {
-      outline: none;
-      border-color: #007bff;
+      outline: none; border-color: #007bff;
       box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
     }
     input[type=text] { margin-top: 0.5rem; width: 100%; box-sizing: border-box; }
@@ -60,81 +55,76 @@
   </div>
 
   <script>
-    function getFinalValue(type, otherId) {
-      const sel = document.getElementById(type);
-      const otherInput = document.getElementById(otherId);
-      if (sel.value === "other" && otherInput.value.trim()) {
-        return otherInput.value.trim();
-      } else if (sel.value && sel.value !== "other") {
-        return sel.value;
+    document.addEventListener("DOMContentLoaded", function() {
+      function getFinalValue(type, otherId) {
+        const sel = document.getElementById(type);
+        const otherInput = document.getElementById(otherId);
+        if (sel.value === "other" && otherInput.value.trim()) {
+          return otherInput.value.trim();
+        } else if (sel.value && sel.value !== "other") {
+          return sel.value;
+        }
+        return "";
       }
-      return "";
-    }
 
-    function toggleOtherInput(selId, inputId) {
-      const sel = document.getElementById(selId);
-      const input = document.getElementById(inputId);
-      if (sel.value === "other") {
-        input.classList.remove("other-input-hidden");
-      } else {
-        input.classList.add("other-input-hidden");
-        input.value = "";
+      function toggleOtherInput(selId, inputId) {
+        const sel = document.getElementById(selId);
+        const input = document.getElementById(inputId);
+        if (sel.value === "other") {
+          input.classList.remove("other-input-hidden");
+        } else {
+          input.classList.add("other-input-hidden"); input.value = "";
+        }
       }
-    }
 
-    function updateJotformFields() {
-      if (typeof JFCustomWidget === "undefined") return;
-      const finalState = getFinalValue("state", "otherStateInput");
-      const finalDistrict = getFinalValue("district", "otherDistrictInput");
-      const finalSite = getFinalValue("site", "otherSiteInput");
-      const isValid = finalState.length > 0 && finalDistrict.length > 0 && finalSite.length > 0;
+      function updateJotformFields() {
+        if (typeof JFCustomWidget === "undefined") return;
+        const finalState = getFinalValue("state", "otherStateInput");
+        const finalDistrict = getFinalValue("district", "otherDistrictInput");
+        const finalSite = getFinalValue("site", "otherSiteInput");
+        const isValid = finalState.length > 0 && finalDistrict.length > 0 && finalSite.length > 0;
 
-      // Debug log
-      console.log("Widget submit values:", {finalState, finalDistrict, finalSite, isValid});
+        // Debug log
+        console.log("UpdateJotformFields:", {finalState, finalDistrict, finalSite, isValid});
 
-      // Fill main form short text fields for integration
-      JFCustomWidget.setFieldsValue({
-        widgetState: finalState,
-        widgetDistrict: finalDistrict,
-        widgetSite: finalSite
+        // These keys must match your field's JotForm Unique Names (not HTML id)
+        JFCustomWidget.setFieldsValue({
+          widgetState: finalState,
+          widgetDistrict: finalDistrict,
+          widgetSite: finalSite
+        });
+
+        // Have widget submit a simple summary string (not empty if valid)
+        const outputText = `State: ${finalState}; District: ${finalDistrict}; Site: ${finalSite}`;
+        JFCustomWidget.sendSubmit({
+          valid: isValid,
+          value: isValid ? outputText : ""
+        });
+      }
+
+      document.getElementById("state").addEventListener("change", function() {
+        toggleOtherInput("state", "otherStateInput"); updateJotformFields();
+      });
+      document.getElementById("district").addEventListener("change", function() {
+        toggleOtherInput("district", "otherDistrictInput"); updateJotformFields();
+      });
+      document.getElementById("site").addEventListener("change", function() {
+        toggleOtherInput("site", "otherSiteInput"); updateJotformFields();
       });
 
-      // Have widget submit a simple summary string (not empty if valid)
-      const outputText = `State: ${finalState}; District: ${finalDistrict}; Site: ${finalSite}`;
-      JFCustomWidget.sendSubmit({
-        valid: isValid,
-        value: isValid ? outputText : ""
-      });
-    }
+      document.getElementById("otherStateInput").addEventListener("input", updateJotformFields);
+      document.getElementById("otherDistrictInput").addEventListener("input", updateJotformFields);
+      document.getElementById("otherSiteInput").addEventListener("input", updateJotformFields);
 
-    document.getElementById("state").addEventListener("change", function() {
-      toggleOtherInput("state", "otherStateInput");
+      // Subscribe to form submit and update fields just before submission
+      if (typeof JFCustomWidget !== "undefined") {
+        JFCustomWidget.subscribe("submit", function(e) {
+          updateJotformFields(); // Synchronous update
+        });
+      }
+      // On initial load, ensure integration fields are filled if defaults chosen
       updateJotformFields();
     });
-    document.getElementById("district").addEventListener("change", function() {
-      toggleOtherInput("district", "otherDistrictInput");
-      updateJotformFields();
-    });
-    document.getElementById("site").addEventListener("change", function() {
-      toggleOtherInput("site", "otherSiteInput");
-      updateJotformFields();
-    });
-
-    document.getElementById("otherStateInput").addEventListener("input", updateJotformFields);
-    document.getElementById("otherDistrictInput").addEventListener("input", updateJotformFields);
-    document.getElementById("otherSiteInput").addEventListener("input", updateJotformFields);
-
-    // Subscribe to form submit and update fields just before submission
-    if (typeof JFCustomWidget !== "undefined") {
-      JFCustomWidget.subscribe("submit", function(e) {
-        setTimeout(updateJotformFields, 50);
-        // Do NOT call e.preventDefault()
-      });
-    }
-
-    // On initial load, ensure integration fields are filled if defaults chosen
-    setTimeout(updateJotformFields, 100);
-
   </script>
 </body>
 </html>
