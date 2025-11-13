@@ -1,130 +1,23 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://js.jotform.com/JotFormCustomWidget.min.js"></script>
-  <style>
-    body { font-family: sans-serif; padding: 1rem; background-color: #f8f8f8; color: #333; }
-    .form-group { display: flex; flex-direction: column; margin-bottom: 1rem; }
-    label { margin-bottom: 0.5rem; font-weight: bold; color: #555; }
-    select, input[type=text] {
-      padding: 0.75rem; border: 1px solid #ccc; border-radius: 8px;
-      background-color: #fff; font-size: 1rem; cursor: pointer;
+<script src="https://js.jotform.com/JotFormCustomWidget.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    if (typeof JFCustomWidget !== "undefined") {
+      JFCustomWidget.setFieldsValue({
+        widgetState: "TestState",
+        widgetDistrict: "TestDistrict",
+        widgetSite: "TestSite"
+      });
+      JFCustomWidget.sendSubmit({valid: true, value: "All test values"});
     }
-    select:focus, input[type=text]:focus {
-      outline: none; border-color: #007bff;
-      box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
-    }
-    input[type=text] { margin-top: 0.5rem; width: 100%; box-sizing: border-box; }
-    .other-input-hidden { display: none; }
-  </style>
-</head>
-<body>
-  <div class="form-group">
-    <label for="state">State</label>
-    <select id="state">
-      <option value="">Please choose</option>
-      <option value="NC">North Carolina</option>
-      <option value="SC">South Carolina</option>
-      <option value="GA">Georgia</option>
-      <option value="other">Other</option>
-    </select>
-    <input type="text" id="otherStateInput" class="other-input-hidden" placeholder="Enter State"/>
-  </div>
-  <div class="form-group">
-    <label for="district">District</label>
-    <select id="district">
-      <option value="">Please choose</option>
-      <option value="East">East</option>
-      <option value="West">West</option>
-      <option value="Central">Central</option>
-      <option value="other">Other</option>
-    </select>
-    <input type="text" id="otherDistrictInput" class="other-input-hidden" placeholder="Enter District"/>
-  </div>
-  <div class="form-group">
-    <label for="site">Site</label>
-    <select id="site">
-      <option value="">Please choose</option>
-      <option value="Alpha">Alpha</option>
-      <option value="Beta">Beta</option>
-      <option value="Gamma">Gamma</option>
-      <option value="other">Other</option>
-    </select>
-    <input type="text" id="otherSiteInput" class="other-input-hidden" placeholder="Enter Site"/>
-  </div>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      function getFinalValue(type, otherId) {
-        const sel = document.getElementById(type);
-        const otherInput = document.getElementById(otherId);
-        if (sel.value === "other" && otherInput.value.trim()) {
-          return otherInput.value.trim();
-        } else if (sel.value && sel.value !== "other") {
-          return sel.value;
-        }
-        return "";
-      }
-
-      function toggleOtherInput(selId, inputId) {
-        const sel = document.getElementById(selId);
-        const input = document.getElementById(inputId);
-        if (sel.value === "other") {
-          input.classList.remove("other-input-hidden");
-        } else {
-          input.classList.add("other-input-hidden"); input.value = "";
-        }
-      }
-
-      function updateJotformFields() {
-        if (typeof JFCustomWidget === "undefined") return;
-        const finalState = getFinalValue("state", "otherStateInput");
-        const finalDistrict = getFinalValue("district", "otherDistrictInput");
-        const finalSite = getFinalValue("site", "otherSiteInput");
-        const isValid = finalState.length > 0 && finalDistrict.length > 0 && finalSite.length > 0;
-
-        // Debug log
-        console.log("UpdateJotformFields:", {finalState, finalDistrict, finalSite, isValid});
-
-        // These keys must match your field's JotForm Unique Names (not HTML id)
-        JFCustomWidget.setFieldsValue({
-          widgetState: finalState,
-          widgetDistrict: finalDistrict,
-          widgetSite: finalSite
-        });
-
-        // Have widget submit a simple summary string (not empty if valid)
-        const outputText = `State: ${finalState}; District: ${finalDistrict}; Site: ${finalSite}`;
-        JFCustomWidget.sendSubmit({
-          valid: isValid,
-          value: isValid ? outputText : ""
-        });
-      }
-
-      document.getElementById("state").addEventListener("change", function() {
-        toggleOtherInput("state", "otherStateInput"); updateJotformFields();
-      });
-      document.getElementById("district").addEventListener("change", function() {
-        toggleOtherInput("district", "otherDistrictInput"); updateJotformFields();
-      });
-      document.getElementById("site").addEventListener("change", function() {
-        toggleOtherInput("site", "otherSiteInput"); updateJotformFields();
-      });
-
-      document.getElementById("otherStateInput").addEventListener("input", updateJotformFields);
-      document.getElementById("otherDistrictInput").addEventListener("input", updateJotformFields);
-      document.getElementById("otherSiteInput").addEventListener("input", updateJotformFields);
-
-      // Subscribe to form submit and update fields just before submission
+    JFCustomWidget.subscribe("submit", function(e) {
       if (typeof JFCustomWidget !== "undefined") {
-        JFCustomWidget.subscribe("submit", function(e) {
-          updateJotformFields(); // Synchronous update
+        JFCustomWidget.setFieldsValue({
+          widgetState: "TestState",
+          widgetDistrict: "TestDistrict",
+          widgetSite: "TestSite"
         });
+        JFCustomWidget.sendSubmit({valid: true, value: "All test values"});
       }
-      // On initial load, ensure integration fields are filled if defaults chosen
-      updateJotformFields();
     });
-  </script>
-</body>
-</html>
+  });
+</script>
