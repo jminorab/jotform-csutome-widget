@@ -635,23 +635,11 @@
             // The widget is only valid if ALL three fields have a non-empty value.
             const isValid = finalState.length > 0 && finalDistrict.length > 0 && finalSite.length > 0;
 
-            // 1. Create the structured data object
-            const structuredData = {
-                state: finalState,
-                district: finalDistrict,
-                site: finalSite
-            };
+        const outputText =
+              `State: ${finalState}; District: ${finalDistrict}; Site: ${finalSite}`;
+                JFCustomWidget.sendSubmit({valid: isValid, value: isValid ? outputText : ""});
 
-            // 2. Convert the data to a JSON string
-            const jsonString = JSON.stringify(structuredData);
-
-            // 3. Send the definitive signal. This is the only communication to the form.
-            JFCustomWidget.sendSubmit({ 
-                valid: isValid,
-                // CRITICAL FIX: The value MUST be non-empty when valid, and empty when invalid.
-                value: isValid ? jsonString : ""
-            });
-            
+          
             // NOTE: Removed setFieldsValue to eliminate conflicts with external hidden fields.
         }
         
